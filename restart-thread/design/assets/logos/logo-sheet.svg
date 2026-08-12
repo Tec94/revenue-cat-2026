@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 620" role="img" aria-labelledby="title desc">
+  <title id="title">Restart Thread reconstructed logo sheet</title>
+  <desc id="desc">Four monochrome logo candidates extracted from the Forward Thread prototype.</desc>
+  <defs>
+    <symbol id="mark-01" viewBox="0 0 256 256">
+      <path d="M110 42H80C52 42 38 58 38 86v22h24V86c0-13 5-20 18-20h30z"/><path d="M38 148v22c0 28 14 44 42 44h30v-24H80c-13 0-18-7-18-20v-22z"/><circle cx="22" cy="128" r="7"/><circle cx="46" cy="128" r="7"/><circle cx="70" cy="128" r="7"/><circle cx="94" cy="128" r="7"/><circle cx="148" cy="128" r="34"/><path d="M198 85c-4-3-9 0-9 5v76c0 5 5 8 9 5l38-36c4-4 4-10 0-14z"/>
+    </symbol>
+    <symbol id="mark-02" viewBox="0 0 256 256">
+      <path d="M118 48H88c-24 0-38 14-38 38v30h22V86c0-11 5-16 16-16h30z"/><path d="M50 140v30c0 24 14 38 38 38h30v-22H88c-11 0-16-5-16-16v-30z"/><circle cx="24" cy="128" r="6"/><circle cx="46" cy="128" r="6"/><circle cx="68" cy="128" r="6"/><circle cx="90" cy="128" r="6"/><circle cx="150" cy="128" r="33"/><path d="M201 87c-4-3-9 0-9 5v72c0 5 5 8 9 5l36-34c4-4 4-10 0-14z"/>
+    </symbol>
+    <symbol id="mark-03" viewBox="0 0 256 256">
+      <path d="M34 130V82c0-29 19-48 48-48h66v32H82c-10 0-16 6-16 16v48z"/><path d="M34 142v32c0 29 19 48 48 48h66v-32H82c-10 0-16-6-16-16v-32z"/><circle cx="76" cy="136" r="7"/><circle cx="98" cy="136" r="7"/><circle cx="154" cy="136" r="34"/><path d="M204 93c-4-3-9 0-9 5v76c0 5 5 8 9 5l38-36c4-4 4-10 0-14z"/>
+    </symbol>
+    <symbol id="mark-04" viewBox="0 0 256 256">
+      <circle cx="50" cy="128" r="9"/><circle cx="80" cy="128" r="9"/><circle cx="146" cy="128" r="38"/><path d="M204 83c-5-4-11 0-11 6v78c0 6 6 10 11 6l39-37c5-4 5-12 0-16z"/>
+    </symbol>
+  </defs>
+  <rect width="1080" height="620" rx="24" fill="#FAFAF7"/>
+  <g fill="#111111" font-family="Arial, sans-serif">
+    <text x="48" y="62" font-size="28" font-weight="700">Restart Thread — Forward Thread marks</text>
+    <text x="48" y="96" font-size="17" fill="#545454">Reconstructed from the locked visual prototype; candidates, not a recorded final logo selection.</text>
+  </g>
+  <g fill="#FFFFFF" stroke="#D7D5CE" stroke-width="2">
+    <rect x="48" y="130" width="230" height="330" rx="24"/><rect x="298" y="130" width="230" height="330" rx="24"/><rect x="548" y="130" width="230" height="330" rx="24"/><rect x="798" y="130" width="230" height="330" rx="24"/>
+  </g>
+  <g fill="#111111">
+    <use href="#mark-01" x="60" y="150" width="206" height="206"/><use href="#mark-02" x="310" y="150" width="206" height="206"/><use href="#mark-03" x="560" y="150" width="206" height="206"/><use href="#mark-04" x="810" y="150" width="206" height="206"/>
+  </g>
+  <g fill="#111111" font-family="Arial, sans-serif" font-size="18" font-weight="700">
+    <text x="68" y="400">01 Open thread</text><text x="318" y="400">02 Corner thread</text><text x="568" y="400">03 Split boundary</text><text x="818" y="400">04 Compact forward</text>
+  </g>
+  <g fill="#545454" font-family="Arial, sans-serif" font-size="14">
+    <text x="68" y="428">Full product story</text><text x="318" y="428">Balanced app-icon candidate</text><text x="568" y="428">Bold editorial candidate</text><text x="818" y="428">Small-size utility mark</text>
+  </g>
+  <line x1="48" y1="514" x2="1032" y2="514" stroke="#D7D5CE" stroke-width="2"/>
+  <circle cx="68" cy="559" r="12" fill="#A91D3A"/>
+  <text x="92" y="566" fill="#111111" font-family="Arial, sans-serif" font-size="17">Large dot = where I am now · dots = context preserved · arrow = one chosen next action</text>
+</svg>
+

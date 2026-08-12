@@ -1,0 +1,22 @@
+concept_id,primary_award,secondary_awards,shared_audience,shared_core_behavior,shared_evidence,incremental_cost,judge_clarity,combination_score,decision
+C01,RevenueCat Design Award,"Best App for Galaxy (Samsung Galaxy) | HAMM Award (Help Apps Make Money)",5,5,4,3,4,4.2,accept
+C02,Best App for Galaxy (Samsung Galaxy),"RevenueCat Design Award | HAMM Award (Help Apps Make Money)",5,5,4,3,5,4.4,accept
+C03,HAMM Award (Help Apps Make Money),RevenueCat Design Award,5,4,4,4,4,4.2,accept
+C04,HAMM Award (Help Apps Make Money),"RevenueCat Design Award | The Growth Loop Award (Layers)",5,5,4,3,4,4.2,accept
+C05,RevenueCat Design Award,"HAMM Award (Help Apps Make Money) | The Growth Loop Award (Layers)",5,5,4,3,4,4.2,accept
+C06,HAMM Award (Help Apps Make Money),RevenueCat Design Award,5,4,4,5,4,4.4,accept
+C07,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,5,4,3,4,4.2,accept
+C08,RevenueCat Design Award,"RevenueCat Peace Prize | The Growth Loop Award (Layers)",5,5,4,3,4,4.2,accept
+C09,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,5,4,3,4,4.2,accept
+C10,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,5,5,3,4,4.4,accept
+C11,RevenueCat Design Award,"RevenueCat Peace Prize | Keep Them Coming Back Award (OneSignal)",5,5,5,3,4,4.4,accept
+C12,RevenueCat Peace Prize,Keep Them Coming Back Award (OneSignal),5,5,5,4,5,4.8,accept
+C13,RevenueCat Design Award,"RevenueCat Peace Prize | Keep Them Coming Back Award (OneSignal)",5,5,5,3,4,4.4,accept
+C14,RevenueCat Design Award,"Best App for Galaxy (Samsung Galaxy) | Keep Them Coming Back Award (OneSignal)",5,5,4,3,5,4.4,accept
+C15,RevenueCat Peace Prize,"Keep Them Coming Back Award (OneSignal) | The Growth Loop Award (Layers)",5,5,4,3,4,4.2,accept
+C16,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,5,5,3,4,4.4,accept
+C17,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,5,5,3,4,4.4,accept
+C18,RevenueCat Design Award,RevenueCat Peace Prize,5,4,4,5,4,4.4,accept
+C19,RevenueCat Design Award,"Next Gen Award | Keep Them Coming Back Award (OneSignal)",5,5,4,3,4,4.2,accept
+C20,RevenueCat Design Award,Next Gen Award,5,5,4,4,4,4.4,accept
+C21,Next Gen Award,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,5,4,3,4,4.2,accept

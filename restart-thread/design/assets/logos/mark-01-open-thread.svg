@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc" color="#111111">
+  <title id="title">Restart Thread open-thread mark</title>
+  <desc id="desc">An interrupted dotted thread enters an open boundary, reaches a large present-state dot, and continues as a forward arrow.</desc>
+  <g fill="currentColor">
+    <path d="M110 42H80C52 42 38 58 38 86v22h24V86c0-13 5-20 18-20h30z"/>
+    <path d="M38 148v22c0 28 14 44 42 44h30v-24H80c-13 0-18-7-18-20v-22z"/>
+    <circle cx="22" cy="128" r="7"/>
+    <circle cx="46" cy="128" r="7"/>
+    <circle cx="70" cy="128" r="7"/>
+    <circle cx="94" cy="128" r="7"/>
+    <circle cx="148" cy="128" r="34"/>
+    <path d="M198 85c-4-3-9 0-9 5v76c0 5 5 8 9 5l38-36c4-4 4-10 0-14z"/>
+  </g>
+</svg>
+

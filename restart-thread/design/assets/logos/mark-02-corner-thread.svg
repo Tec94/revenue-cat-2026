@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc" color="#111111">
+  <title id="title">Restart Thread corner-thread mark</title>
+  <desc id="desc">Four context dots pass through two compact open corners toward a large present-state dot and forward arrow.</desc>
+  <g fill="currentColor">
+    <path d="M118 48H88c-24 0-38 14-38 38v30h22V86c0-11 5-16 16-16h30z"/>
+    <path d="M50 140v30c0 24 14 38 38 38h30v-22H88c-11 0-16-5-16-16v-30z"/>
+    <circle cx="24" cy="128" r="6"/>
+    <circle cx="46" cy="128" r="6"/>
+    <circle cx="68" cy="128" r="6"/>
+    <circle cx="90" cy="128" r="6"/>
+    <circle cx="150" cy="128" r="33"/>
+    <path d="M201 87c-4-3-9 0-9 5v72c0 5 5 8 9 5l36-34c4-4 4-10 0-14z"/>
+  </g>
+</svg>
+

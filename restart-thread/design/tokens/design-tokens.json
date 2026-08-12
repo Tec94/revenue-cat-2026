@@ -1,0 +1,94 @@
+{
+  "meta": {
+    "name": "Restart Thread — Forward Thread",
+    "version": "0.1.0",
+    "status": "locked direction; implementation extraction",
+    "source": "forward-thread-prototype.png plus accepted Run 8 H2 and I2-V1 specifications",
+    "notes": "Values marked reconstructed are starting values inferred from the static board and require rendered-device validation."
+  },
+  "color": {
+    "light": {
+      "surface": { "value": "#FAFAF7", "oklch": "oklch(0.984 0.004 106.5)" },
+      "textPrimary": { "value": "#111111", "oklch": "oklch(0.178 0 89.9)" },
+      "textSecondary": { "value": "#545454", "oklch": "oklch(0.446 0 89.9)" },
+      "action": { "value": "#A91D3A", "oklch": "oklch(0.480 0.173 16.3)" },
+      "onAction": { "value": "#FFFFFF", "oklch": "oklch(1 0 89.9)" },
+      "rule": { "value": "#D7D5CE", "status": "reconstructed from board" },
+      "actionDepth": { "value": "#650F24", "status": "reconstructed tonal extension" }
+    },
+    "dark": {
+      "surface": { "value": "#0D0D0D", "oklch": "oklch(0.159 0 89.9)" },
+      "surfaceRaised": { "value": "#1A1A1A", "status": "reconstructed from board" },
+      "textPrimary": { "value": "#F7F7F2", "oklch": "oklch(0.975 0.007 106.5)" },
+      "textSecondary": { "value": "#BDBDB5", "oklch": "oklch(0.796 0.011 106.6)" },
+      "action": { "value": "#FF8298", "oklch": "oklch(0.753 0.153 10.3)" },
+      "onAction": { "value": "#3A0612", "oklch": "oklch(0.231 0.080 13.1)" },
+      "actionDepth": { "value": "#A91D3A", "status": "reconstructed role mapping" }
+    },
+    "rules": {
+      "singleAccentMeaning": "Red means user-controlled action, selection, trace, or focus; errors require a separate icon and label.",
+      "primaryEmphasis": "One filled red action per decision context.",
+      "increasedContrast": "Required but not numerically defined by the prototype; derive and remeasure every rendered pair."
+    }
+  },
+  "typography": {
+    "families": {
+      "display": {
+        "value": "platform serif or verified licensed editorial serif",
+        "confidence": "visual category observed; exact family unknown"
+      },
+      "interfaceAndroid": { "value": "Roboto or active Android system sans" },
+      "interfaceApple": { "value": "SF system text styles" }
+    },
+    "rolesAndroid": {
+      "display": { "sizeSp": 40, "lineHeightSp": 44, "weight": 700, "family": "display" },
+      "screenTitle": { "sizeSp": 28, "lineHeightSp": 34, "weight": 700, "family": "display" },
+      "firstAction": { "sizeSp": 24, "lineHeightSp": 31, "weight": 600, "family": "interfaceAndroid" },
+      "deck": { "sizeSp": 17, "lineHeightSp": 24, "weight": 500, "family": "interfaceAndroid" },
+      "body": { "sizeSp": 16, "lineHeightSp": 25, "weight": 400, "family": "interfaceAndroid" },
+      "label": { "sizeSp": 13, "lineHeightSp": 18, "weight": 600, "family": "interfaceAndroid" },
+      "timer": { "sizeSp": 34, "lineHeightSp": 40, "weight": 500, "family": "interfaceAndroid", "numeric": "tabular" }
+    }
+  },
+  "layout": {
+    "baselineDp": 4,
+    "componentRhythmDp": 8,
+    "phoneMarginDp": { "min": 20, "max": 24 },
+    "minimumTouchTargetDp": 48,
+    "readingMeasureCharacters": { "min": 45, "max": 68 }
+  },
+  "shape": {
+    "editorialSurfaceRadiusDp": { "min": 0, "max": 8 },
+    "primaryActionRadiusDp": { "value": 12, "status": "reconstructed from board" },
+    "primaryActionVisualHeightDp": { "value": 56, "status": "reconstructed starting value" },
+    "evidenceSurfaceRadiusDp": { "value": 8, "status": "reconstructed from board" },
+    "lockedCapsule": "pill"
+  },
+  "depth": {
+    "default": "flat or separated by rules",
+    "primaryAction": {
+      "restingContactShadowDp": { "value": 7, "status": "reconstructed starting value" },
+      "pressedContactShadowDp": { "value": 2, "status": "reconstructed starting value" },
+      "pressedTranslationDp": { "value": 5, "status": "reconstructed starting value" },
+      "ambientShadow": "soft dark halo behind a crisp colored contact edge",
+      "topHighlight": "one restrained top-edge highlight; no glass or gloss"
+    }
+  },
+  "motion": {
+    "pressMs": { "min": 80, "max": 120 },
+    "stateMs": { "min": 160, "max": 220 },
+    "spatialMs": { "min": 220, "max": 280 },
+    "entrance": "ease-out",
+    "exit": "ease-in",
+    "traceBack": "single direct dotted connector reveal; no spring",
+    "reducedMotion": "static final connector or short opacity crossfade"
+  },
+  "sensory": {
+    "default": "quiet",
+    "primaryActionHaptic": "platform confirmation cue after accepted activation; optional and never the only feedback",
+    "durableSaveHaptic": "discrete system success cue only after the local file commit",
+    "optionalSaveSound": "one dry soft page tap with no loop or reverb; respect silent and Do Not Disturb",
+    "recording": "no custom sound or continuous haptic while the microphone is active"
+  }
+}
+

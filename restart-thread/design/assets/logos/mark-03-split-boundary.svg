@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc" color="#111111">
+  <title id="title">Restart Thread split-boundary mark</title>
+  <desc id="desc">A heavier split boundary acknowledges interruption while two context dots point to a large present-state dot and a forward arrow.</desc>
+  <g fill="currentColor">
+    <path d="M34 130V82c0-29 19-48 48-48h66v32H82c-10 0-16 6-16 16v48z"/>
+    <path d="M34 142v32c0 29 19 48 48 48h66v-32H82c-10 0-16-6-16-16v-32z"/>
+    <circle cx="76" cy="136" r="7"/>
+    <circle cx="98" cy="136" r="7"/>
+    <circle cx="154" cy="136" r="34"/>
+    <path d="M204 93c-4-3-9 0-9 5v76c0 5 5 8 9 5l38-36c4-4 4-10 0-14z"/>
+  </g>
+</svg>
+

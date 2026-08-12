@@ -1,0 +1,54 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "restart-thread-api",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-08-12",
+	"observability": {
+		"enabled": true
+	},
+	"secrets": {
+		"required": ["INSTALLATION_TOKEN_SECRET"]
+	},
+	"ai": {
+		"binding": "AI"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "restart-thread-dev",
+			"database_id": "edf85e5d-74d0-4c0b-b1be-417e74416ad0",
+			"migrations_dir": "migrations"
+		}
+	],
+	"vars": {
+		"AI_MODE": "deterministic",
+		"CLOUD_RECOVERY_ENABLED": "false",
+		"ENVIRONMENT": "development",
+		"FREE_CLOUD_ALLOWANCE": "7"
+	},
+	"env": {
+		"production": {
+			"name": "restart-thread-api-production",
+			"secrets": {
+				"required": ["INSTALLATION_TOKEN_SECRET"]
+			},
+			"ai": {
+				"binding": "AI"
+			},
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "restart-thread-production",
+					"database_id": "61a36740-0205-4e9f-b22d-366d10866781",
+					"migrations_dir": "migrations"
+				}
+			],
+			"vars": {
+				"AI_MODE": "deterministic",
+				"CLOUD_RECOVERY_ENABLED": "false",
+				"ENVIRONMENT": "production",
+				"FREE_CLOUD_ALLOWANCE": "7"
+			}
+		}
+	}
+}

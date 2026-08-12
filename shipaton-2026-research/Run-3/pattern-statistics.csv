@@ -1,0 +1,19 @@
+pattern,title,winner_assessed,winner_present,winner_present_pct,winner_strong,winner_strong_pct,control_assessed,control_present,control_present_pct,control_strong,control_strong_pct,presence_gap_pp,strong_gap_pp,winner_2024_present_pct,winner_2024_strong_pct,winner_2025_present_pct,winner_2025_strong_pct,unknown_projects,classification,transfer_confidence
+P01,Coherent primary loop,39,39,100.0,32,82.1,16,15,93.8,11,68.8,6.2,13.3,100.0,77.8,100.0,83.3,0,Common practice with transferable execution value,high
+P02,Short time to first value,39,39,100.0,26,66.7,16,16,100.0,11,68.8,0.0,-2.1,100.0,66.7,100.0,66.7,0,Common practice rather than differentiator,high
+P03,Shipped differentiating mechanism,39,39,100.0,26,66.7,16,15,93.8,8,50.0,6.2,16.7,100.0,66.7,100.0,66.7,0,Strength signal rather than binary differentiator,medium
+P04,Feedback-to-result chain,39,36,92.3,29,74.4,16,13,81.2,4,25.0,11.1,49.4,88.9,55.6,93.3,80.0,0,Strong-chain differentiator and family-sensitive,high
+P05,Information restraint,39,35,89.7,22,56.4,16,12,75.0,8,50.0,14.7,6.4,88.9,55.6,90.0,56.7,0,Borderline prevalence signal and general practice,medium
+P06,Judge-observable proof,39,39,100.0,37,94.9,16,16,100.0,11,68.8,0.0,26.1,100.0,88.9,100.0,96.7,0,Strong proof-quality differentiator,high
+P07,Monetization follows delivered value,32,31,96.9,17,53.1,15,13,86.7,4,26.7,10.2,26.5,100.0,57.1,96.0,52.0,8,Strong-quality signal with coverage limit,medium
+P10,Proportional trust safety and recovery,39,34,87.2,7,17.9,16,11,68.8,3,18.8,18.4,-0.8,88.9,11.1,86.7,20.0,0,Partial-support gap but no strong differentiator,medium
+P11,Experiment runway,39,33,84.6,14,35.9,16,13,81.2,4,25.0,3.4,10.9,88.9,22.2,83.3,40.0,0,Common practice with launch-family concentration,medium
+S01,Ten-second value proposition,39,39,100.0,38,97.4,16,16,100.0,14,87.5,0.0,9.9,100.0,88.9,100.0,100.0,0,Universal submission hygiene,high
+S02,Personal founder insight,39,39,100.0,28,71.8,16,16,100.0,8,50.0,0.0,21.8,100.0,55.6,100.0,76.7,0,Story-strength signal rather than binary differentiator,medium
+S03,Narrow first version,39,35,89.7,27,69.2,16,12,75.0,8,50.0,14.7,19.2,88.9,77.8,90.0,66.7,0,Borderline prevalence signal and general practice,medium
+S04,Platform-native leverage,39,39,100.0,27,69.2,16,16,100.0,11,68.8,0.0,0.5,100.0,66.7,100.0,70.0,0,Common overall and award-specific for platform tracks,high
+S05,Measurable traction,39,18,46.2,11,28.2,16,5,31.2,4,25.0,14.9,3.2,22.2,0.0,53.3,36.7,0,Award-specific and chronology-sensitive,medium
+S06,Built-in distribution loop,39,23,59.0,10,25.6,16,9,56.2,1,6.2,2.7,19.4,55.6,22.2,60.0,26.7,0,Common weakly but strong execution is a possible signal,medium
+S07,Distinctive visual or motion signature,39,39,100.0,26,66.7,16,16,100.0,7,43.8,0.0,22.9,100.0,77.8,100.0,63.3,0,Strength signal and award-sensitive,medium
+S08,Affirmative accessibility or trust evidence,39,35,89.7,9,23.1,16,11,68.8,3,18.8,21.0,4.3,88.9,11.1,90.0,26.7,0,Partial-support gap but award-specific strong evidence,medium
+N01,Evidence-chain density,39,39,100.0,NA,58.8,16,16,100.0,NA,44.1,0.0,14.7,NA,NA,NA,NA,0,Newly observed portfolio-level signal,medium

@@ -1,0 +1,28 @@
+# Android and Gradle
+android/.gradle/
+android/.gradle-home/
+android/.android-home/
+android/.kotlin/
+android/**/build/
+android/local.properties
+android/*.jks
+android/*.keystore
+
+# Xcode
+iosApp/**/xcuserdata/
+iosApp/**/*.xcuserstate
+iosApp/DerivedData/
+iosApp/Secrets.xcconfig
+
+# Cloudflare and Node
+backend/node_modules/
+backend/.wrangler/
+backend/.config/
+backend/.dev.vars
+backend/.env
+
+# IDE and OS
+.idea/
+*.iml
+.DS_Store
+Thumbs.db

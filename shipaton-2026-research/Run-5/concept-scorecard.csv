@@ -1,0 +1,22 @@
+concept_id,problem_id,concept_name,primary_award,secondary_awards,user_value_evidence,differentiation,time_to_first_value,buildability,monetization_fit,distribution_access,platform_leverage,operational_safety,primary_award_fit,base_score,user_value_score,solo_builder_score,commercial_score,platform_award_score,base_rank
+C01,T2-S1,TraceTag,RevenueCat Design Award,"Best App for Galaxy (Samsung Galaxy) | HAMM Award (Help Apps Make Money)",5,4.5,5,4,5,4,5,3.5,5,91.4,91.5,87.5,91.0,94.0,1
+C14,T5-S1,Breadcrumb,RevenueCat Design Award,"Best App for Galaxy (Samsung Galaxy) | Keep Them Coming Back Award (OneSignal)",4.5,5,5,4.5,3.5,4,5,4.5,5,90.8,91.5,91.5,86.0,94.5,2
+C13,T5-S1,Reset Button,RevenueCat Design Award,"RevenueCat Peace Prize | Keep Them Coming Back Award (OneSignal)",5,4,5,5,3.5,4,4.5,4,5,89.8,91.0,92.0,85.0,91.5,3
+C02,T2-S1,FieldBoard,Best App for Galaxy (Samsung Galaxy),"RevenueCat Design Award | HAMM Award (Help Apps Make Money)",4.5,4,4.5,4.5,4.5,4,5,4.5,5,88.8,88.5,89.5,88.5,91.5,4
+C04,T2-S2,ScopeSignal,HAMM Award (Help Apps Make Money),"RevenueCat Design Award | The Growth Loop Award (Layers)",5,4,5,4,4.5,4.5,4,3.5,5,88.3,89.5,85.5,88.0,88.5,5
+C16,T5-S2,Capacity Compass,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,4,5,4.5,3.5,3.5,4.5,3,5,85.9,87.0,85.5,80.5,89.0,6
+C05,T2-S2,BriefBack,RevenueCat Design Award,"HAMM Award (Help Apps Make Money) | The Growth Loop Award (Layers)",4.5,4.5,4.5,3.5,4.5,5,3.5,3.5,4.5,85.0,86.0,80.5,86.5,83.5,7
+C21,T5-S3,Project Thread,Next Gen Award,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",4,4.5,4.5,4.5,3,4,4.5,5,4.5,84.7,85.5,88.0,80.5,87.0,8
+C17,T5-S2,Recovery Reserve,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",4.5,4.5,4.5,4,3.5,3.5,4,3,4.5,81.6,82.5,80.0,77.5,83.5,9
+C20,T5-S3,Backlog Tamer,RevenueCat Design Award,Next Gen Award,4.5,4,4.5,3.5,3.5,4.5,3.5,4,4.5,81.2,83.5,79.5,80.0,81.0,10
+C15,T5-S1,Start Together,RevenueCat Peace Prize,"Keep Them Coming Back Award (OneSignal) | The Growth Loop Award (Layers)",4.5,4,4.5,3.5,3,5,4,3,4.5,80.6,82.5,77.0,77.5,82.0,11
+C08,T3-S1,Claim the Outcome,RevenueCat Design Award,"RevenueCat Peace Prize | The Growth Loop Award (Layers)",4.5,4,4,4,3,4,4,4,4.5,80.5,82.5,81.0,77.0,82.0,12
+C19,T5-S3,Reentry Map,RevenueCat Design Award,"Next Gen Award | Keep Them Coming Back Award (OneSignal)",4.5,4.5,4,3,3.5,4,4,4,4.5,80.0,82.5,76.5,78.5,82.0,13
+C07,T3-S1,WholeJob,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,4.5,3.5,3.5,3.5,3,4,3.5,4.5,79.8,82.5,77.5,76.5,82.0,14
+C06,T2-S2,Decision Ledger,HAMM Award (Help Apps Make Money),RevenueCat Design Award,4.5,3.5,4,4,4,4,3.5,4,4,79.7,81.0,80.0,80.0,78.0,15
+C10,T3-S2,Care Relay,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",5,4,4,3,4,3.5,4,2.5,5,78.9,81.0,73.0,77.5,82.0,16
+C11,T3-S2,Need-to-Know,RevenueCat Design Award,"RevenueCat Peace Prize | Keep Them Coming Back Award (OneSignal)",5,4.5,4,2.5,4,3.5,4,2.5,5,78.9,81.5,71.0,77.5,82.5,17
+C12,T3-S2,Coverage Gap,RevenueCat Peace Prize,Keep Them Coming Back Award (OneSignal),4.5,3.5,4.5,3.5,3.5,4,4,3.5,4.5,78.8,80.5,77.0,77.0,80.5,18
+C09,T3-S1,Weekly Handoff,RevenueCat Peace Prize,"RevenueCat Design Award | Keep Them Coming Back Award (OneSignal)",4.5,4,4,4.5,2.5,3,3.5,4.5,4,78.4,81.0,83.0,72.5,78.5,19
+C03,T2-S1,ReportProof,HAMM Award (Help Apps Make Money),RevenueCat Design Award,4.5,4,3.5,2.5,5,3.5,3,2.5,4.5,74.3,75.5,67.0,78.0,74.0,20
+C18,T5-S2,Pattern Without Pressure,RevenueCat Design Award,RevenueCat Peace Prize,4.5,4,3,3.5,4,3,3.5,2.5,4.5,74.1,75.0,71.0,73.5,75.5,21

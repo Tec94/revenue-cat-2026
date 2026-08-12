@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="root" path="restart-thread-vault/" />
+    <exclude domain="file" path="restart-thread-vault/" />
+    <exclude domain="sharedpref" path="installation_credentials.xml" />
+</full-backup-content>
+

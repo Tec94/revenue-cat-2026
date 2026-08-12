@@ -1,0 +1,25 @@
+{
+	"name": "restart-thread-backend",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"cf-typegen": "wrangler types .wrangler/worker-configuration.d.ts",
+		"check": "npm run cf-typegen && tsc --noEmit && vitest run",
+		"deploy": "wrangler deploy",
+		"deploy:production": "wrangler deploy --env production",
+		"dev": "wrangler dev",
+		"d1:migrate:local": "wrangler d1 migrations apply restart-thread-dev --local",
+		"d1:migrate:dev": "wrangler d1 migrations apply DB --remote",
+		"d1:migrate:production": "wrangler d1 migrations apply DB --remote --env production",
+		"test": "vitest run",
+		"type-check": "wrangler types && tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^5.5.2",
+		"vitest": "~3.2.0",
+		"wrangler": "^4.121.0"
+	},
+	"engines": {
+		"node": ">=20"
+	}
+}

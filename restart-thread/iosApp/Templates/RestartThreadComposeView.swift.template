@@ -1,0 +1,39 @@
+import RestartThreadShared
+import SwiftUI
+import UIKit
+
+struct RestartThreadComposeView: UIViewControllerRepresentable {
+    let platform: any RestartThreadPlatform
+    let revenueCatApiKey: String
+
+    func makeUIViewController(context: Context) -> UIViewController {
+        MainViewControllerKt.MainViewController(
+            platform: platform,
+            revenueCatApiKey: revenueCatApiKey
+        )
+    }
+
+    func updateUIViewController(
+        _ uiViewController: UIViewController,
+        context: Context
+    ) {}
+}
+
+// Use this from the Xcode-generated app entry after the native adapter exists:
+//
+// @main
+// struct RestartThreadApp: App {
+//     private let platform = NativeRestartThreadPlatform()
+//     private let revenueCatApiKey =
+//         Bundle.main.object(forInfoDictionaryKey: "REVENUECAT_API_KEY") as? String ?? ""
+//
+//     var body: some Scene {
+//         WindowGroup {
+//             RestartThreadComposeView(
+//                 platform: platform,
+//                 revenueCatApiKey: revenueCatApiKey
+//             )
+//                 .ignoresSafeArea()
+//         }
+//     }
+// }
