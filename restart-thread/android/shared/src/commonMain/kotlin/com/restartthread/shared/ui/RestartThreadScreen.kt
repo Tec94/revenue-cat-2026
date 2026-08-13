@@ -33,7 +33,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -784,7 +783,12 @@ private fun BrandHeader(
         if (showBack) HeaderIconButton("Go back", onBack, Modifier.align(Alignment.CenterStart)) {
             BackIcon()
         }
-        BrandMark(Modifier.align(Alignment.Center).size(48.dp))
+        BrandMark(
+            Modifier
+                .align(Alignment.Center)
+                .offset(x = (-1).dp)
+                .size(38.dp),
+        )
         if (showSettings) HeaderIconButton("Settings", onSettings, Modifier.align(Alignment.CenterEnd)) {
             SettingsIcon()
         }
@@ -798,18 +802,33 @@ private fun HeaderIconButton(
     modifier: Modifier,
     icon: @Composable BoxScope.() -> Unit,
 ) {
-    IconButton(
+    Surface(
         onClick = onClick,
         modifier = modifier.size(48.dp).semantics { contentDescription = label },
-    ) { Box(Modifier.size(24.dp), content = icon) }
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(Modifier.size(34.dp), content = icon)
+        }
+    }
 }
 
 @Composable
 private fun BackIcon() {
     val color = MaterialTheme.colorScheme.onBackground
     Canvas(Modifier.fillMaxSize()) {
-        drawLine(color, Offset(18f, 4f), Offset(8f, 12f), strokeWidth = 2.4f, cap = StrokeCap.Round)
-        drawLine(color, Offset(8f, 12f), Offset(18f, 20f), strokeWidth = 2.4f, cap = StrokeCap.Round)
+        val stroke = 2.5.dp.toPx()
+        val point = Offset(size.width * 0.20f, size.height * 0.50f)
+        val top = Offset(size.width * 0.50f, size.height * 0.20f)
+        val bottom = Offset(size.width * 0.50f, size.height * 0.80f)
+        val end = Offset(size.width * 0.80f, size.height * 0.50f)
+        drawLine(color, top, point, strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color, point, bottom, strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color, point, end, strokeWidth = stroke, cap = StrokeCap.Round)
     }
 }
 
@@ -817,18 +836,21 @@ private fun BackIcon() {
 private fun SettingsIcon() {
     val color = MaterialTheme.colorScheme.onBackground
     Canvas(Modifier.fillMaxSize()) {
-        drawCircle(color, radius = 5f, center = center, style = Stroke(width = 2.3f))
+        val radius = size.minDimension
+        val stroke = 2.dp.toPx()
+        drawCircle(color, radius = radius * 0.29f, center = center, style = Stroke(width = stroke))
+        drawCircle(color, radius = radius * 0.11f, center = center, style = Stroke(width = stroke))
         repeat(8) { index ->
             val angle = index * 45.0 * kotlin.math.PI / 180.0
             val start = Offset(
-                center.x + (8f * kotlin.math.cos(angle)).toFloat(),
-                center.y + (8f * kotlin.math.sin(angle)).toFloat(),
+                center.x + (radius * 0.32f * kotlin.math.cos(angle)).toFloat(),
+                center.y + (radius * 0.32f * kotlin.math.sin(angle)).toFloat(),
             )
             val end = Offset(
-                center.x + (11f * kotlin.math.cos(angle)).toFloat(),
-                center.y + (11f * kotlin.math.sin(angle)).toFloat(),
+                center.x + (radius * 0.43f * kotlin.math.cos(angle)).toFloat(),
+                center.y + (radius * 0.43f * kotlin.math.sin(angle)).toFloat(),
             )
-            drawLine(color, start, end, strokeWidth = 2.3f, cap = StrokeCap.Round)
+            drawLine(color, start, end, strokeWidth = stroke, cap = StrokeCap.Round)
         }
     }
 }
@@ -1254,7 +1276,13 @@ private fun SwitchCurrentDialog(current: RecoveryThread?, actions: RestartThread
 private fun BrandMark(modifier: Modifier = Modifier) {
     val color = MaterialTheme.colorScheme.onBackground
     Canvas(modifier = modifier.semantics { contentDescription = "Restart Thread" }) {
-        withTransform({ scale(size.width / 256f, size.height / 256f) }) {
+        withTransform({
+            scale(
+                scaleX = size.width / 256f,
+                scaleY = size.height / 256f,
+                pivot = Offset.Zero,
+            )
+        }) {
             drawOpenMark(color)
         }
     }
