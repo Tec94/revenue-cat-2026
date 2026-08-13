@@ -26,6 +26,17 @@ class RestartThreadControllerTest {
     }
 
     @Test
+    fun privacyDetailsReturnToWelcomeDuringOnboarding() {
+        val controller = RestartThreadController(FakePlatform())
+
+        controller.showDataPrivacy()
+        controller.goBack()
+
+        assertEquals(AppRoute.WELCOME, controller.state.value.route)
+        assertFalse(controller.state.value.onboardingComplete)
+    }
+
+    @Test
     fun realStartBecomesTheCurrentThreadOnNow() {
         val platform = FakePlatform()
         val controller = RestartThreadController(platform)

@@ -4,21 +4,27 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +33,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -34,19 +41,27 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -70,25 +85,94 @@ private val Ink = Color(0xFF111111)
 private val Gray = Color(0xFF545454)
 private val ActionRed = Color(0xFFA91D3A)
 private val ActionEdge = Color(0xFF6F0E26)
-private val PaleRed = Color(0xFFF8E7EB)
-private val Rule = Color(0xFFD8D5CF)
+private val White = Color(0xFFFFFFFF)
+private val DarkPaper = Color(0xFF0D0D0D)
+private val DarkSurface = Color(0xFF181818)
+private val DarkRule = Color(0xFF383838)
+private val DarkAccent = Color(0xFFFF8298)
+
+private val LightColors = lightColorScheme(
+    primary = ActionRed,
+    onPrimary = White,
+    primaryContainer = ActionEdge,
+    onPrimaryContainer = White,
+    secondary = Ink,
+    onSecondary = Paper,
+    secondaryContainer = Color.Black,
+    onSecondaryContainer = Paper,
+    background = Paper,
+    onBackground = Ink,
+    surface = White,
+    onSurface = Ink,
+    surfaceVariant = Color(0xFFF1EEE7),
+    onSurfaceVariant = Gray,
+    outline = Color(0xFFD8D5CF),
+    error = Color(0xFFB3261E),
+)
+
+private val DarkColors = darkColorScheme(
+    primary = DarkAccent,
+    onPrimary = Color(0xFF3A0010),
+    primaryContainer = Color(0xFF7A1230),
+    onPrimaryContainer = White,
+    secondary = Paper,
+    onSecondary = Ink,
+    secondaryContainer = Color(0xFFC7C4BC),
+    onSecondaryContainer = Ink,
+    background = DarkPaper,
+    onBackground = Paper,
+    surface = DarkSurface,
+    onSurface = Paper,
+    surfaceVariant = Color(0xFF242424),
+    onSurfaceVariant = Color(0xFFC9C6C0),
+    outline = DarkRule,
+    error = Color(0xFFFF8A80),
+)
 
 private val RestartTypography = Typography(
     displayLarge = Typography().displayLarge.copy(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
-        fontSize = 40.sp,
-        lineHeight = 44.sp,
+        fontSize = 42.sp,
+        lineHeight = 46.sp,
+        letterSpacing = (-0.6).sp,
     ),
     headlineLarge = Typography().headlineLarge.copy(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
-        fontSize = 30.sp,
-        lineHeight = 36.sp,
+        fontSize = 34.sp,
+        lineHeight = 38.sp,
+        letterSpacing = (-0.35).sp,
     ),
     headlineMedium = Typography().headlineMedium.copy(
         fontFamily = FontFamily.Serif,
         fontWeight = FontWeight.Bold,
+        fontSize = 28.sp,
+        lineHeight = 33.sp,
+    ),
+    titleLarge = Typography().titleLarge.copy(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
+        lineHeight = 27.sp,
+    ),
+    titleMedium = Typography().titleMedium.copy(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 17.sp,
+        lineHeight = 24.sp,
+    ),
+    bodyLarge = Typography().bodyLarge.copy(fontSize = 17.sp, lineHeight = 27.sp),
+    bodyMedium = Typography().bodyMedium.copy(fontSize = 15.sp, lineHeight = 23.sp),
+    bodySmall = Typography().bodySmall.copy(fontSize = 13.sp, lineHeight = 19.sp),
+    labelLarge = Typography().labelLarge.copy(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 15.sp,
+        lineHeight = 20.sp,
+    ),
+    labelMedium = Typography().labelMedium.copy(
+        fontWeight = FontWeight.Bold,
+        fontSize = 12.sp,
+        lineHeight = 17.sp,
+        letterSpacing = 0.5.sp,
     ),
 )
 
@@ -102,26 +186,46 @@ fun RestartThreadScreen(
     onManageSubscription: (() -> Unit)? = null,
     actions: RestartThreadUiActions,
 ) {
-    MaterialTheme(typography = RestartTypography) {
-        Surface(color = Paper, contentColor = Ink, modifier = Modifier.fillMaxSize()) {
+    MaterialTheme(
+        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
+        typography = RestartTypography,
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.fillMaxSize(),
+        ) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
-                val horizontalPadding = if (maxWidth >= 600.dp) 48.dp else 20.dp
+                val horizontalPadding = when {
+                    maxWidth >= 840.dp -> 48.dp
+                    maxWidth >= 600.dp -> 32.dp
+                    else -> 20.dp
+                }
                 Column(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .fillMaxSize()
-                        .widthIn(max = 760.dp)
+                        .widthIn(max = 720.dp)
+                        .windowInsetsPadding(WindowInsets.safeDrawing)
+                        .imePadding()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = horizontalPadding, vertical = 24.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                        .padding(horizontal = horizontalPadding, vertical = 12.dp),
                 ) {
                     if (state.route !in setOf(AppRoute.BOOTSTRAP, AppRoute.WELCOME)) {
                         BrandHeader(
-                            showBack = state.onboardingComplete &&
-                                state.route !in setOf(AppRoute.NOW, AppRoute.ACCOUNT_OFFER),
-                            onBack = actions.goNow,
+                            showBack = state.route == AppRoute.DATA_PRIVACY ||
+                                state.onboardingComplete && state.route !in setOf(
+                                    AppRoute.NOW,
+                                    AppRoute.ACCOUNT_OFFER,
+                                ),
+                            showSettings = state.onboardingComplete && state.route !in setOf(
+                                AppRoute.SETTINGS,
+                                AppRoute.DATA_PRIVACY,
+                            ),
+                            onBack = actions.goBack,
                             onSettings = actions.showSettings,
                         )
+                        Spacer(Modifier.height(28.dp))
                     }
                     RouteContent(
                         state = state,
@@ -133,13 +237,13 @@ fun RestartThreadScreen(
                         actions = actions,
                     )
                     state.message?.let {
-                        Text(it, color = Gray, style = MaterialTheme.typography.bodyMedium)
+                        Spacer(Modifier.height(20.dp))
+                        StatusBanner(it)
                     }
+                    Spacer(Modifier.height(36.dp))
                 }
 
-                if (state.showSwitchCurrent) {
-                    SwitchCurrentDialog(state.currentThread, actions)
-                }
+                if (state.showSwitchCurrent) SwitchCurrentDialog(state.currentThread, actions)
             }
         }
     }
@@ -168,12 +272,12 @@ private fun RouteContent(
         AppRoute.THREAD_DETAIL -> ThreadDetailScreen(state, actions)
         AppRoute.RECENTLY_DELETED -> RecentlyDeletedScreen(state, actions)
         AppRoute.SETTINGS -> SettingsScreen(
-            authState = authState,
-            microphonePermission = microphonePermission,
-            subscriptionState = subscriptionState,
-            onUpgrade = onUpgrade,
-            onManageSubscription = onManageSubscription,
-            actions = actions,
+            authState,
+            microphonePermission,
+            subscriptionState,
+            onUpgrade,
+            onManageSubscription,
+            actions,
         )
         AppRoute.DATA_PRIVACY -> DataPrivacyScreen(actions)
     }
@@ -182,216 +286,184 @@ private fun RouteContent(
 @Composable
 private fun BootstrapScreen() {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 96.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = 104.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp),
     ) {
-        BrandMark(MarkKind.OPEN, Modifier.size(112.dp))
+        BrandMark(Modifier.size(112.dp))
         Text("Restart Thread", style = MaterialTheme.typography.headlineLarge)
     }
 }
 
 @Composable
-private fun WelcomeScreen(actions: RestartThreadUiActions) {
-    Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 28.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        BrandMark(MarkKind.OPEN, Modifier.size(128.dp))
-        Text(
-            "Say where you are.\nStart again from one clear step.",
-            style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.semantics { heading() },
-        )
-        Text(
-            "Leave a thread in your own words. Restart Thread keeps it on this device " +
-                "and helps you choose one place to begin.",
-            color = Gray,
-            style = MaterialTheme.typography.bodyLarge,
-        )
+private fun WelcomeScreen(actions: RestartThreadUiActions) = ScreenColumn(topPadding = 28.dp) {
+    BrandMark(Modifier.size(118.dp).align(Alignment.CenterHorizontally))
+    PageIntro(
+        eyebrow = "A clear place to restart",
+        title = "Say where you are. Start again from one clear step.",
+        body = "Leave a thread in your own words. It stays on this device and gives you one place to begin.",
+        display = true,
+    )
+    PrivacyNote("No account or microphone permission is needed to begin.")
+    ActionGroup {
         TactilePrimaryButton("Leave my first thread", actions.leaveFirstThread)
-        OutlinedAction("Try the 20-second example", actions.tryExample)
-        TextButton(onClick = actions.showAccountOffer, modifier = Modifier.fillMaxWidth()) {
-            Text("Sign in")
-        }
-        TextButton(onClick = actions.showDataPrivacy, modifier = Modifier.fillMaxWidth()) {
-            Text("How your data stays local")
-        }
+        SecondaryAction("Try the 20-second example", actions.tryExample)
+        TertiaryAction("Sign in", actions.showAccountOffer)
+        TertiaryAction("How your data stays local", actions.showDataPrivacy)
     }
 }
 
 @Composable
-private fun CaptureScreen(state: MainUiState, actions: RestartThreadUiActions) {
-    ScreenTitle("Where were you?")
-    Text(
-        "Say or type what is true right now. It saves on this device before anything else happens.",
-        color = Gray,
+private fun CaptureScreen(state: MainUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    PageIntro(
+        eyebrow = "Leave a thread",
+        title = "Where were you?",
+        body = "Say or type what is true right now. Your words save on this device before anything else happens.",
     )
-    OutlinedTextField(
-        value = state.input,
-        onValueChange = actions.setInput,
-        modifier = Modifier.fillMaxWidth(),
-        minLines = 5,
-        label = { Text("Current state") },
-        placeholder = { Text("I was working on… The part blocking me is…") },
-    )
-    CaptureProgressLabel(state.captureProgress)
-    TactilePrimaryButton("Save and find a first step", actions.saveText, container = Ink)
-    OutlinedAction(
-        if (state.isRecording) "Stop and save voice note" else "Record a voice note",
-        actions.voice,
-    )
-    Text(
-        "Voice and text are equal routes. Microphone access is requested only when you choose voice.",
-        color = Gray,
-        style = MaterialTheme.typography.bodySmall,
-    )
-}
-
-@Composable
-private fun ReviewScreen(
-    state: MainUiState,
-    actions: RestartThreadUiActions,
-    isExample: Boolean,
-) {
-    ReviewContent(state, actions, isExample)
-}
-
-@Composable
-private fun ReviewContent(
-    state: MainUiState,
-    actions: RestartThreadUiActions,
-    isExample: Boolean,
-) {
-    val whyVisible = remember(state.route, state.threadId) { androidx.compose.runtime.mutableStateOf(false) }
-    if (isExample) {
-        Text("20-second example", color = ActionRed, fontWeight = FontWeight.Bold)
-        Text("Nothing here is saved or sent.", color = Gray)
+    ContentCard {
+        OutlinedTextField(
+            value = state.input,
+            onValueChange = actions.setInput,
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 5,
+            label = { Text("Current state") },
+            placeholder = { Text("I was working on… The part blocking me is…") },
+        )
+        CaptureProgressLabel(state.captureProgress)
     }
-    ScreenTitle("Start here")
-    CaptureProgressLabel(state.captureProgress)
-    EvidenceCard(label = "YOU SAID", text = state.input.ifBlank { state.evidence })
-    DottedTrace()
-    OutlinedTextField(
-        value = state.action,
-        onValueChange = actions.setAction,
-        modifier = Modifier.fillMaxWidth(),
-        minLines = 3,
-        label = { Text("Editable first step") },
-        supportingText = {
-            Text(
-                if (state.isAiGenerated) "AI draft. You stay in control. Nothing starts automatically."
-                else "You stay in control. Nothing starts automatically.",
-            )
+    ActionGroup {
+        TactilePrimaryButton("Save and find a first step", actions.saveText, ink = true)
+        SecondaryAction(
+            if (state.isRecording) "Stop and save voice note" else "Record a voice note",
+            actions.voice,
+        )
+    }
+    SupportingText("Voice and text are equal routes. Microphone access is requested only after you choose voice.")
+}
+
+@Composable
+private fun ReviewScreen(state: MainUiState, actions: RestartThreadUiActions, isExample: Boolean) = ScreenColumn {
+    val whyVisible = remember(state.route, state.threadId) { mutableStateOf(false) }
+    if (isExample) StatusPill("20-second example")
+    PageIntro(
+        eyebrow = if (isExample) "Try the core loop" else "Your first step",
+        title = "Start here",
+        body = if (isExample) {
+            "This example is temporary. Change the first step or start it as written."
+        } else {
+            "Keep the step small and specific. You can change the draft before anything starts."
         },
     )
-    TactilePrimaryButton("Start this step", actions.confirmStart)
-    OutlinedButton(
-        onClick = { whyVisible.value = !whyVisible.value },
-        modifier = Modifier.height(48.dp).alignStart(),
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        Text(if (whyVisible.value) "Hide source" else "Why this?")
+    CaptureProgressLabel(state.captureProgress)
+    EvidenceCard("You said", state.input.ifBlank { state.evidence })
+    DottedTrace()
+    ContentCard {
+        OutlinedTextField(
+            value = state.action,
+            onValueChange = actions.setAction,
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3,
+            label = { Text("Editable first step") },
+            supportingText = {
+                Text(
+                    if (state.isAiGenerated) "AI draft. You decide what to keep and when to start."
+                    else "You decide what to keep and when to start.",
+                )
+            },
+        )
+    }
+    ActionGroup {
+        TactilePrimaryButton("Start this step", actions.confirmStart)
+        SecondaryAction(
+            if (whyVisible.value) "Hide source" else "Why this step?",
+            { whyVisible.value = !whyVisible.value },
+        )
+        if (!isExample) TertiaryAction("Save and return later", actions.goNow)
     }
     if (whyVisible.value) {
         DottedTrace()
         SourceEvidence(state.evidence)
     }
-    if (!isExample) {
-        TextButton(onClick = actions.goNow, modifier = Modifier.fillMaxWidth()) {
-            Text("Save and return later")
-        }
-    }
+    if (isExample) SupportingText("The example is discarded after you start. It never enters your history.")
 }
 
 @Composable
-private fun CaptureProgressLabel(progress: CaptureProgress) {
-    val label = when (progress) {
-        CaptureProgress.IDLE -> return
-        CaptureProgress.SAVING -> "Saving locally…"
-        CaptureProgress.SAVED -> "Saved locally"
-        CaptureProgress.TRANSCRIBING -> "Transcribing voice note…"
-        CaptureProgress.DRAFTING -> "Drafting a first step…"
-        CaptureProgress.PARTIAL_SUCCESS -> "Saved locally; part of the draft needs attention"
-        CaptureProgress.VOICE_ONLY -> "Voice note saved locally; transcription is not available yet"
-        CaptureProgress.FAILED -> "Not saved yet"
-    }
-    Text(label, color = Gray, style = MaterialTheme.typography.bodySmall)
-}
-
-@Composable
-private fun StartedScreen(state: MainUiState, actions: RestartThreadUiActions) {
-    Spacer(Modifier.height(24.dp))
-    ScreenTitle("You moved it forward.")
-    Text(state.action, style = MaterialTheme.typography.titleLarge)
-    Text("This is a verified restart—not just an app open.", color = Gray)
-    TactilePrimaryButton("Back to Now", actions.finishStarted, container = Ink)
-    OutlinedAction("Leave a new stopping point", actions.leaveNewStoppingPoint)
-    TextButton(onClick = actions.markCurrentComplete, modifier = Modifier.fillMaxWidth()) {
-        Text("Mark complete")
-    }
-    TextButton(onClick = actions.archiveCurrent, modifier = Modifier.fillMaxWidth()) {
-        Text("Archive")
-    }
-}
-
-@Composable
-private fun AccountOfferScreen(authState: AuthUiState, actions: RestartThreadUiActions) {
-    Spacer(Modifier.height(20.dp))
-    ScreenTitle("Keep Pro and cloud access with you.")
-    Text(
-        "An account links your Pro entitlement, cloud allowance, web purchases, and future " +
-            "referrals. Your thread text and audio remain on this device.",
-        color = Gray,
+private fun StartedScreen(state: MainUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    StatusPill("Restart started")
+    PageIntro(
+        eyebrow = "Progress you can verify",
+        title = "You moved it forward.",
+        body = "This restart is tied to the step you chose—not just an app open.",
     )
+    FocusCard(label = "Started step", text = state.action)
+    ActionGroup {
+        TactilePrimaryButton("Back to Now", actions.finishStarted, ink = true)
+        SecondaryAction("Leave a new stopping point", actions.leaveNewStoppingPoint)
+        TertiaryAction("Mark thread complete", actions.markCurrentComplete)
+        TertiaryAction("Archive thread", actions.archiveCurrent)
+    }
+}
+
+@Composable
+private fun AccountOfferScreen(authState: AuthUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    PageIntro(
+        eyebrow = "Optional account",
+        title = "Keep Pro and cloud access with you.",
+        body = "An account links Pro, cloud allowance, web purchases, and future referrals. Thread text and audio remain on this device.",
+    )
+    ContentCard {
+        BenefitLine("Use the same Pro entitlement after sign-in.")
+        BenefitLine("Keep local threads separate from account data.")
+        BenefitLine("Continue without an account at any time.")
+    }
     if (authState.isAuthenticated) {
-        EvidenceCard("SIGNED IN", authState.displayName ?: "Your account is connected.")
+        FocusCard("Signed in", authState.displayName ?: "Your account is connected.")
         TactilePrimaryButton("Continue to Now", actions.completeAccountStep)
     } else {
-        TactilePrimaryButton(
-            if (authState.isLoading) "Opening secure sign-in…" else "Create or sign in",
-            actions.signIn,
-        )
-        OutlinedAction("Continue without an account", actions.completeAccountStep)
+        ActionGroup {
+            TactilePrimaryButton(
+                if (authState.isLoading) "Opening secure sign-in…" else "Create or sign in",
+                actions.signIn,
+            )
+            SecondaryAction("Continue without an account", actions.completeAccountStep)
+        }
     }
     if (!authState.isConfigured) {
-        Text(
-            "Sign-in needs the Auth0 public configuration before it can open. Local use is available now.",
-            color = Gray,
-            style = MaterialTheme.typography.bodySmall,
-        )
+        PrivacyNote("Sign-in is not configured yet. Local use is available now.")
     }
-    authState.message?.let { Text(it, color = Gray) }
+    authState.message?.let { SupportingText(it) }
 }
 
 @Composable
-private fun NowScreen(state: MainUiState, actions: RestartThreadUiActions) {
-    ScreenTitle("Now")
+private fun NowScreen(state: MainUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    PageIntro(
+        eyebrow = "Your current place",
+        title = "Now",
+        body = "Return to one thread or leave a clear stopping point for later.",
+    )
     val current = state.currentThread
     if (current == null) {
-        Column(
-            modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(12.dp)).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text("Nothing is waiting here", style = MaterialTheme.typography.titleLarge)
-            Text("Leave where you are so one clear step is ready when you return.", color = Gray)
-            TactilePrimaryButton("Leave a thread", actions.startNewThread)
-        }
+        EmptyStateCard(
+            title = "Nothing is waiting here",
+            body = "Leave where you are so one clear step is ready when you return.",
+            action = "Leave a thread",
+            onAction = actions.startNewThread,
+        )
     } else {
         ReturnCard(current, actions)
-        OutlinedAction("Update stopping point", actions.leaveNewStoppingPoint)
+        SecondaryAction("Update stopping point", actions.leaveNewStoppingPoint)
     }
 
     val recents = state.threads
         .filter { it.status != ThreadStatus.DELETED && it.id != current?.id }
         .take(3)
     if (recents.isNotEmpty()) {
-        SectionLabel("RECENT")
-        recents.forEach { ThreadRow(it, actions.openThread) }
+        SectionHeading("Recent threads")
+        ThreadListCard(recents, actions.openThread)
     }
-    OutlinedAction("All threads", actions.showAllThreads)
-    TextButton(onClick = actions.showSettings, modifier = Modifier.fillMaxWidth()) {
-        Text("Settings")
+    ActionGroup {
+        SecondaryAction("View all threads", actions.showAllThreads)
+        TertiaryAction("Open settings", actions.showSettings)
     }
 }
 
@@ -400,18 +472,34 @@ private fun ReturnCard(thread: RecoveryThread, actions: RestartThreadUiActions) 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Ink, RoundedCornerShape(14.dp))
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(22.dp))
+            .padding(22.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("RETURN TO THREAD", color = Color(0xFFFF8298), fontWeight = FontWeight.Bold)
-        Text(thread.capturedText, color = Paper, style = MaterialTheme.typography.bodyLarge)
-        HorizontalDivider(color = Color.White.copy(alpha = 0.25f))
-        Text(thread.proposedAction, color = Paper, style = MaterialTheme.typography.titleLarge)
+        Text(
+            "Return to thread",
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Text(
+            thread.capturedText,
+            color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.78f),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.2f))
+        Text(
+            thread.proposedAction,
+            color = MaterialTheme.colorScheme.onSecondary,
+            style = MaterialTheme.typography.titleLarge,
+        )
         Button(
             onClick = { actions.openThread(thread.id) },
-            colors = ButtonDefaults.buttonColors(containerColor = ActionRed, contentColor = Color.White),
-            modifier = Modifier.fillMaxWidth().height(48.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            ),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            shape = RoundedCornerShape(12.dp),
         ) {
             Text("Return to thread")
         }
@@ -419,13 +507,18 @@ private fun ReturnCard(thread: RecoveryThread, actions: RestartThreadUiActions) 
 }
 
 @Composable
-private fun AllThreadsScreen(state: MainUiState, actions: RestartThreadUiActions) {
-    ScreenTitle("All threads")
+private fun AllThreadsScreen(state: MainUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    PageIntro(
+        eyebrow = "Local history",
+        title = "All threads",
+        body = "Search the words you saved or the first step you chose.",
+    )
     OutlinedTextField(
         value = state.searchQuery,
         onValueChange = actions.setSearchQuery,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text("Search saved words and first steps") },
+        label = { Text("Search threads") },
+        placeholder = { Text("Words or first step") },
         singleLine = true,
     )
     val query = state.searchQuery.trim()
@@ -436,72 +529,79 @@ private fun AllThreadsScreen(state: MainUiState, actions: RestartThreadUiActions
             )
     }
     if (visible.isEmpty()) {
-        Text("No threads match this search.", color = Gray)
+        EmptyStateCard(
+            title = if (query.isBlank()) "No saved threads" else "No matching threads",
+            body = if (query.isBlank()) {
+                "Threads appear here after you save a stopping point."
+            } else {
+                "Try a different word from your stopping point or first step."
+            },
+        )
     } else {
         ThreadStatus.entries.filter { it != ThreadStatus.DELETED }.forEach { status ->
             val section = visible.filter { it.status == status }
             if (section.isNotEmpty()) {
-                SectionLabel(status.name)
-                section.forEach { ThreadRow(it, actions.openThread) }
+                SectionHeading(status.displayName())
+                ThreadListCard(section, actions.openThread)
             }
         }
     }
-    TextButton(onClick = actions.showRecentlyDeleted, modifier = Modifier.fillMaxWidth()) {
-        Text("Recently Deleted")
-    }
+    SettingsActionRow(
+        title = "Recently deleted",
+        supporting = "Restore a thread or remove it permanently.",
+        onClick = actions.showRecentlyDeleted,
+    )
 }
 
 @Composable
-private fun ThreadDetailScreen(state: MainUiState, actions: RestartThreadUiActions) {
-    val thread = state.selectedThread ?: run {
-        Text("This thread is unavailable.", color = Gray)
-        return
+private fun ThreadDetailScreen(state: MainUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    val thread = state.selectedThread
+    if (thread == null) {
+        EmptyStateCard("Thread unavailable", "Return to your local history and choose another thread.")
+        return@ScreenColumn
     }
-    Text(thread.status.name.lowercase().replaceFirstChar { it.uppercase() }, color = ActionRed)
-    ScreenTitle("Thread detail")
-    EvidenceCard("YOU SAID", thread.capturedText)
-    SectionLabel("START HERE")
-    Text(thread.proposedAction, style = MaterialTheme.typography.titleLarge)
-    OutlinedAction("Edit", actions.editSelectedThread)
-    if (thread.status == ThreadStatus.ACTIVE) {
-        TactilePrimaryButton("Return to thread", actions.returnToSelectedThread)
-        OutlinedAction("Update stopping point", actions.editSelectedThread)
-        TextButton(onClick = actions.completeSelectedThread, modifier = Modifier.fillMaxWidth()) {
-            Text("Mark complete")
+    StatusPill(thread.status.displayName())
+    PageIntro(
+        eyebrow = "Saved thread",
+        title = "Thread detail",
+        body = "Review the saved context and the step you chose.",
+    )
+    EvidenceCard("You said", thread.capturedText)
+    FocusCard("Start here", thread.proposedAction)
+    SettingsCard("Thread actions") {
+        SettingsActionRow("Edit stopping point", "Change the saved context and first step.", actions.editSelectedThread)
+        if (thread.status == ThreadStatus.ACTIVE) {
+            SettingsActionRow("Return to thread", "Open the saved first step.", actions.returnToSelectedThread)
+            SettingsActionRow("Mark complete", "Move this thread out of Now.", actions.completeSelectedThread)
         }
-    }
-    TextButton(onClick = actions.archiveSelectedThread, modifier = Modifier.fillMaxWidth()) {
-        Text("Archive")
-    }
-    TextButton(onClick = actions.exportSelectedThread, modifier = Modifier.fillMaxWidth()) {
-        Text("Export")
-    }
-    TextButton(onClick = actions.deleteSelectedThread, modifier = Modifier.fillMaxWidth()) {
-        Text("Delete", color = ActionRed)
+        SettingsActionRow("Archive thread", "Keep it in history without making it current.", actions.archiveSelectedThread)
+        SettingsActionRow("Export thread", "Share a readable copy from this device.", actions.exportSelectedThread)
+        SettingsActionRow("Delete thread", "Move it to Recently deleted.", actions.deleteSelectedThread, destructive = true)
     }
 }
 
 @Composable
-private fun RecentlyDeletedScreen(state: MainUiState, actions: RestartThreadUiActions) {
-    ScreenTitle("Recently Deleted")
-    Text(
-        "Restore a thread or delete it permanently. Restart Thread does not silently expire these records.",
-        color = Gray,
+private fun RecentlyDeletedScreen(state: MainUiState, actions: RestartThreadUiActions) = ScreenColumn {
+    PageIntro(
+        eyebrow = "Local recovery",
+        title = "Recently deleted",
+        body = "Deleted threads remain here until you restore or permanently delete them.",
     )
     val deleted = state.threads.filter { it.status == ThreadStatus.DELETED }
     if (deleted.isEmpty()) {
-        Text("Nothing has been deleted.", color = Gray)
-    }
-    deleted.forEach { thread ->
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(thread.proposedAction, style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { actions.restoreThread(thread.id) }) { Text("Restore") }
-                TextButton(onClick = { actions.permanentlyDeleteThread(thread.id) }) {
-                    Text("Delete permanently", color = ActionRed)
-                }
+        EmptyStateCard("Nothing is deleted", "Threads that you delete will appear here.")
+    } else {
+        deleted.forEach { thread ->
+            ContentCard {
+                Text(thread.proposedAction, style = MaterialTheme.typography.titleMedium)
+                SupportingText(thread.capturedText, maxLines = 3)
+                SecondaryAction("Restore thread", { actions.restoreThread(thread.id) })
+                TertiaryAction(
+                    "Delete permanently",
+                    { actions.permanentlyDeleteThread(thread.id) },
+                    destructive = true,
+                )
             }
-            HorizontalDivider(color = Rule)
         }
     }
 }
@@ -514,77 +614,119 @@ private fun SettingsScreen(
     onUpgrade: (() -> Unit)?,
     onManageSubscription: (() -> Unit)?,
     actions: RestartThreadUiActions,
-) {
+) = ScreenColumn {
     val confirmLocalDelete = remember { mutableStateOf(false) }
     val confirmCloudDelete = remember { mutableStateOf(false) }
-    ScreenTitle("Settings")
-    SettingsSection("ACCOUNT") {
-        Text(
-            when {
-                authState.isAuthenticated -> authState.displayName ?: "Signed in"
-                authState.isConfigured -> "Using Restart Thread without an account"
-                else -> "Local-only use; Auth0 is not configured"
-            },
-        )
+    PageIntro(
+        eyebrow = "Preferences and access",
+        title = "Settings",
+        body = "Manage your account, Pro access, local data, and Android surfaces.",
+    )
+
+    SettingsCard(
+        title = "Account",
+        summary = when {
+            authState.isAuthenticated -> authState.displayName ?: "Signed in"
+            authState.isConfigured -> "Using Restart Thread without an account"
+            else -> "Local-only use"
+        },
+        badge = if (authState.isAuthenticated) "Connected" else "Optional",
+    ) {
+        if (!authState.isConfigured) {
+            SupportingText("Auth0 is not configured. You can continue to use local threads.")
+        }
         if (authState.isAuthenticated) {
-            TextButton(onClick = actions.signOut) { Text("Sign out") }
-            TextButton(onClick = { confirmCloudDelete.value = true }) {
-                Text("Delete cloud account", color = ActionRed)
-            }
+            SettingsActionRow("Sign out", "Keep local threads on this device.", actions.signOut)
+            SettingsActionRow(
+                "Delete cloud account",
+                "Remove account access and cloud allowance data.",
+                { confirmCloudDelete.value = true },
+                destructive = true,
+            )
         } else {
-            TextButton(onClick = actions.signIn) { Text("Create or sign in") }
+            SettingsActionRow("Create or sign in", "Link Pro and cloud allowance to your account.", actions.signIn)
         }
     }
-    SettingsSection("RESTART THREAD PRO") {
-        Text(if (subscriptionState.isPro) "Pro is active" else "Free plan")
-        if (subscriptionState.isPro && onManageSubscription != null) {
-            OutlinedAction("Open Customer Center", onManageSubscription)
-        } else if (onUpgrade != null) {
-            OutlinedAction("Explore Pro", onUpgrade)
+
+    SettingsCard(
+        title = "Restart Thread Pro",
+        summary = if (subscriptionState.isPro) "Pro is active" else "Free plan",
+        badge = if (subscriptionState.isPro) "Active" else null,
+    ) {
+        when {
+            subscriptionState.isPro && onManageSubscription != null -> SettingsActionRow(
+                "Manage subscription",
+                "Open Customer Center for billing and cancellation options.",
+                onManageSubscription,
+            )
+            onUpgrade != null -> SettingsActionRow(
+                "Explore Pro",
+                "Compare the available monthly and yearly plans.",
+                onUpgrade,
+            )
         }
-        TextButton(onClick = actions.restorePurchases) { Text("Restore Purchases") }
-        subscriptionState.statusMessage?.let { Text(it, color = Gray) }
+        SettingsActionRow("Restore purchases", "Check this store account for active purchases.", actions.restorePurchases)
+        subscriptionState.statusMessage?.let { SupportingText(it) }
     }
-    SettingsSection("VOICE AND AI") {
-        Text("Thread text and audio stay encrypted on this device.", color = Gray)
-        Text(
-            if (microphonePermission == MicrophonePermissionState.GRANTED) {
-                "Microphone access is allowed"
+
+    SettingsCard(
+        title = "Voice and AI",
+        summary = "Thread text and audio stay encrypted on this device.",
+        badge = if (microphonePermission == MicrophonePermissionState.GRANTED) "Microphone on" else "Microphone off",
+    ) {
+        SettingsActionRow(
+            title = "Microphone permission",
+            supporting = if (microphonePermission == MicrophonePermissionState.GRANTED) {
+                "Voice capture is available."
             } else {
-                "Microphone access is not allowed"
+                "Text capture remains fully available."
             },
-        )
-        TextButton(onClick = actions.openMicrophoneSettings) { Text("Open microphone settings") }
-    }
-    SettingsSection("DATA") {
-        TextButton(onClick = actions.showDataPrivacy) { Text("Privacy and local data") }
-        Text("Export is available from each thread.", color = Gray)
-        TextButton(onClick = { confirmLocalDelete.value = true }) {
-            Text("Delete all local threads", color = ActionRed)
-        }
-    }
-    SettingsSection("ANDROID") {
-        OutlinedAction("Add home widget", actions.requestWidgetPin)
-        Text(
-            "The widget can show the current first step. Add it only where that is private enough.",
-            color = Gray,
+            onClick = actions.openMicrophoneSettings,
         )
     }
-    SettingsSection("ABOUT") {
-        TextButton(onClick = actions.openPrivacyPolicy) { Text("Privacy policy") }
-        TextButton(onClick = actions.openTerms) { Text("Terms") }
-        TextButton(onClick = actions.openSupport) { Text("Support") }
+
+    SettingsCard(
+        title = "Data",
+        summary = "Local threads and cloud account data are separate.",
+    ) {
+        SettingsActionRow("Privacy and local data", "See what stays local and what an account links.", actions.showDataPrivacy)
+        SupportingText("Export is available from each thread.")
+        SettingsActionRow(
+            "Delete all local threads",
+            "Move every local thread to Recently deleted.",
+            { confirmLocalDelete.value = true },
+            destructive = true,
+        )
     }
+
+    SettingsCard(
+        title = "Home widget",
+        summary = "Return to the current thread from the Android home screen.",
+        badge = "Android",
+    ) {
+        SettingsActionRow(
+            "Add home widget",
+            "The widget can show your current first step. Add it only where that is private enough.",
+            actions.requestWidgetPin,
+        )
+    }
+
+    SettingsCard("About") {
+        SettingsActionRow("Privacy policy", null, actions.openPrivacyPolicy)
+        SettingsActionRow("Terms", null, actions.openTerms)
+        SettingsActionRow("Support", null, actions.openSupport)
+    }
+
     if (confirmLocalDelete.value) {
         AlertDialog(
             onDismissRequest = { confirmLocalDelete.value = false },
-            title = { Text("Delete all local threads?") },
-            text = { Text("They move to Recently Deleted and can still be restored or removed permanently.") },
+            title = { Text("Move all threads to Recently deleted?") },
+            text = { Text("You can restore them later or delete them permanently.") },
             confirmButton = {
                 TextButton(onClick = {
                     confirmLocalDelete.value = false
                     actions.deleteAllLocalThreads()
-                }) { Text("Move to Recently Deleted", color = ActionRed) }
+                }) { Text("Move all threads", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmLocalDelete.value = false }) { Text("Cancel") }
@@ -594,15 +736,13 @@ private fun SettingsScreen(
     if (confirmCloudDelete.value) {
         AlertDialog(
             onDismissRequest = { confirmCloudDelete.value = false },
-            title = { Text("Delete the cloud account?") },
-            text = {
-                Text("This removes the Auth0 account and account-bound allowance data. Local threads stay on this device.")
-            },
+            title = { Text("Delete cloud account?") },
+            text = { Text("This removes Auth0 and cloud allowance data. Local threads stay on this device.") },
             confirmButton = {
                 TextButton(onClick = {
                     confirmCloudDelete.value = false
                     actions.deleteCloudAccount()
-                }) { Text("Delete cloud account", color = ActionRed) }
+                }) { Text("Delete cloud account", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
                 TextButton(onClick = { confirmCloudDelete.value = false }) { Text("Cancel") }
@@ -612,142 +752,352 @@ private fun SettingsScreen(
 }
 
 @Composable
-private fun DataPrivacyScreen(actions: RestartThreadUiActions) {
-    ScreenTitle("Your thread stays with you.")
-    Text(
-        "Restart Thread saves thread text and voice in an encrypted vault on this device before " +
-            "any optional processing. The guided example is disposable and never enters the vault.",
+private fun DataPrivacyScreen(actions: RestartThreadUiActions) = ScreenColumn {
+    PageIntro(
+        eyebrow = "Privacy by default",
+        title = "Your thread stays with you.",
+        body = "Restart Thread saves text and voice in an encrypted vault on this device before any optional processing.",
     )
     EvidenceCard(
-        "ACCOUNTS",
-        "Signing in links Pro and cloud allowance. It does not turn on thread sync and the backend " +
-            "does not receive your thread text or audio.",
+        "Guided example",
+        "The example is disposable. It is not saved, sent, or added to your history.",
     )
     EvidenceCard(
-        "YOUR CHOICES",
-        "You can use text when microphone access is denied, export individual threads, delete local " +
-            "threads, and delete the separate cloud account.",
+        "Accounts",
+        "Signing in links Pro and cloud allowance. It does not turn on thread sync, and the backend does not receive thread text or audio.",
     )
-    OutlinedAction("Back", actions.goNow)
+    EvidenceCard(
+        "Your choices",
+        "Use text without microphone access, export individual threads, delete local threads, or delete the separate cloud account.",
+    )
+    SecondaryAction("Go back", actions.goBack)
 }
 
 @Composable
-private fun BrandHeader(showBack: Boolean, onBack: () -> Unit, onSettings: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (showBack) {
-                TextButton(onClick = onBack, modifier = Modifier.height(48.dp)) { Text("Back") }
-            }
-            BrandMark(MarkKind.COMPACT, Modifier.size(42.dp))
-            Text(
-                "Restart Thread",
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge,
-            )
+private fun BrandHeader(
+    showBack: Boolean,
+    showSettings: Boolean,
+    onBack: () -> Unit,
+    onSettings: () -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxWidth().height(56.dp)) {
+        if (showBack) HeaderIconButton("Go back", onBack, Modifier.align(Alignment.CenterStart)) {
+            BackIcon()
         }
-        TextButton(onClick = onSettings, modifier = Modifier.height(48.dp)) { Text("Settings") }
+        BrandMark(Modifier.align(Alignment.Center).size(48.dp))
+        if (showSettings) HeaderIconButton("Settings", onSettings, Modifier.align(Alignment.CenterEnd)) {
+            SettingsIcon()
+        }
     }
-    HorizontalDivider(color = Rule)
 }
 
 @Composable
-private fun TactilePrimaryButton(
+private fun HeaderIconButton(
     label: String,
     onClick: () -> Unit,
-    container: Color = ActionRed,
+    modifier: Modifier,
+    icon: @Composable BoxScope.() -> Unit,
 ) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier.size(48.dp).semantics { contentDescription = label },
+    ) { Box(Modifier.size(24.dp), content = icon) }
+}
+
+@Composable
+private fun BackIcon() {
+    val color = MaterialTheme.colorScheme.onBackground
+    Canvas(Modifier.fillMaxSize()) {
+        drawLine(color, Offset(18f, 4f), Offset(8f, 12f), strokeWidth = 2.4f, cap = StrokeCap.Round)
+        drawLine(color, Offset(8f, 12f), Offset(18f, 20f), strokeWidth = 2.4f, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
+private fun SettingsIcon() {
+    val color = MaterialTheme.colorScheme.onBackground
+    Canvas(Modifier.fillMaxSize()) {
+        drawCircle(color, radius = 5f, center = center, style = Stroke(width = 2.3f))
+        repeat(8) { index ->
+            val angle = index * 45.0 * kotlin.math.PI / 180.0
+            val start = Offset(
+                center.x + (8f * kotlin.math.cos(angle)).toFloat(),
+                center.y + (8f * kotlin.math.sin(angle)).toFloat(),
+            )
+            val end = Offset(
+                center.x + (11f * kotlin.math.cos(angle)).toFloat(),
+                center.y + (11f * kotlin.math.sin(angle)).toFloat(),
+            )
+            drawLine(color, start, end, strokeWidth = 2.3f, cap = StrokeCap.Round)
+        }
+    }
+}
+
+@Composable
+private fun ScreenColumn(
+    topPadding: androidx.compose.ui.unit.Dp = 0.dp,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = topPadding),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        content = content,
+    )
+}
+
+@Composable
+private fun PageIntro(
+    eyebrow: String,
+    title: String,
+    body: String? = null,
+    display: Boolean = false,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Eyebrow(eyebrow)
+        Text(
+            title,
+            style = if (display) MaterialTheme.typography.displayLarge else MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.semantics { heading() }.widthIn(max = 640.dp),
+        )
+        body?.let { Text(it, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyLarge) }
+    }
+}
+
+@Composable
+private fun Eyebrow(text: String) {
+    Text(text, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)
+}
+
+@Composable
+private fun SectionHeading(text: String) {
+    Text(text, style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+}
+
+@Composable
+private fun ContentCard(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(20.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        content = content,
+    )
+}
+
+@Composable
+private fun FocusCard(label: String, text: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(18.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Eyebrow(label)
+        Text(text, style = MaterialTheme.typography.titleLarge)
+    }
+}
+
+@Composable
+private fun EvidenceCard(label: String, text: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(18.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Eyebrow(label)
+        Text(text, style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
+private fun EmptyStateCard(
+    title: String,
+    body: String,
+    action: String? = null,
+    onAction: (() -> Unit)? = null,
+) {
+    ContentCard {
+        Text(title, style = MaterialTheme.typography.titleLarge)
+        SupportingText(body)
+        if (action != null && onAction != null) TactilePrimaryButton(action, onAction)
+    }
+}
+
+@Composable
+private fun PrivacyNote(text: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(14.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+        Text(text, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun StatusBanner(text: String) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+    ) {
+        Text(text, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+private fun StatusPill(text: String) {
+    Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = CircleShape) {
+        Text(
+            text,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelMedium,
+        )
+    }
+}
+
+@Composable
+private fun BenefitLine(text: String) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Top) {
+        Box(Modifier.padding(top = 8.dp).size(8.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+        Text(text, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
+    }
+}
+
+@Composable
+private fun ActionGroup(content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+}
+
+@Composable
+private fun TactilePrimaryButton(label: String, onClick: () -> Unit, ink: Boolean = false) {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
-    Box(modifier = Modifier.fillMaxWidth().height(64.dp)) {
+    val colors = MaterialTheme.colorScheme
+    val container = if (ink) colors.secondary else colors.primary
+    val content = if (ink) colors.onSecondary else colors.onPrimary
+    val edge = if (ink) colors.secondaryContainer else colors.primaryContainer
+    Box(modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp)) {
         Box(
             Modifier
+                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
                 .height(58.dp)
                 .offset(y = 6.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (container == Ink) Color(0xFF000000) else ActionEdge),
+                .clip(RoundedCornerShape(14.dp))
+                .background(edge),
         )
         Button(
             onClick = onClick,
             interactionSource = interaction,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .offset(y = if (pressed) 5.dp else 0.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = Color.White),
-            shape = RoundedCornerShape(12.dp),
+                .heightIn(min = 58.dp)
+                .scale(if (pressed) 0.96f else 1f),
+            colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = content),
+            shape = RoundedCornerShape(14.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 18.dp, vertical = 14.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(Modifier.size(18.dp).background(Color.White, CircleShape))
-                Text(label, fontWeight = FontWeight.SemiBold)
-                Text("›", fontSize = 28.sp)
+                Box(Modifier.size(18.dp).background(content, CircleShape))
+                Text(label, modifier = Modifier.padding(horizontal = 12.dp), style = MaterialTheme.typography.labelLarge)
+                ForwardArrow(content)
             }
         }
     }
 }
 
 @Composable
-private fun OutlinedAction(label: String, onClick: () -> Unit) {
+private fun ForwardArrow(color: Color) {
+    Canvas(Modifier.size(20.dp)) {
+        drawLine(color, Offset(4f, 10f), Offset(16f, 10f), strokeWidth = 2.3f, cap = StrokeCap.Round)
+        drawLine(color, Offset(11f, 5f), Offset(16f, 10f), strokeWidth = 2.3f, cap = StrokeCap.Round)
+        drawLine(color, Offset(11f, 15f), Offset(16f, 10f), strokeWidth = 2.3f, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
+private fun SecondaryAction(label: String, onClick: () -> Unit) {
     OutlinedButton(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth().height(52.dp),
-        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp),
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 18.dp, vertical = 13.dp),
+    ) { Text(label, style = MaterialTheme.typography.labelLarge) }
+}
+
+@Composable
+private fun TertiaryAction(label: String, onClick: () -> Unit, destructive: Boolean = false) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        Text(label)
+        Text(
+            label,
+            color = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelLarge,
+        )
     }
 }
 
 @Composable
-private fun ScreenTitle(text: String) {
-    Text(text, style = MaterialTheme.typography.headlineLarge, modifier = Modifier.semantics { heading() })
+private fun SupportingText(text: String, maxLines: Int = Int.MAX_VALUE) {
+    Text(
+        text,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium,
+        maxLines = maxLines,
+    )
 }
 
 @Composable
-private fun SectionLabel(text: String) {
-    Text(text, color = ActionRed, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.labelLarge)
-}
-
-@Composable
-private fun EvidenceCard(label: String, text: String) {
-    Column(
-        modifier = Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(10.dp)).padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SectionLabel(label)
-        Text(text, style = MaterialTheme.typography.bodyLarge)
+private fun CaptureProgressLabel(progress: CaptureProgress) {
+    val label = when (progress) {
+        CaptureProgress.IDLE -> return
+        CaptureProgress.SAVING -> "Saving locally…"
+        CaptureProgress.SAVED -> "Saved locally"
+        CaptureProgress.TRANSCRIBING -> "Transcribing voice note…"
+        CaptureProgress.DRAFTING -> "Drafting a first step…"
+        CaptureProgress.PARTIAL_SUCCESS -> "Saved locally. Part of the draft needs attention."
+        CaptureProgress.VOICE_ONLY -> "Voice note saved locally. Transcription is not available yet."
+        CaptureProgress.FAILED -> "Not saved yet"
     }
+    PrivacyNote(label)
 }
 
 @Composable
 private fun SourceEvidence(source: String) {
     val phrase = "cancellation fee"
+    val primary = MaterialTheme.colorScheme.primary
     val annotated = buildAnnotatedString {
         val start = source.indexOf(phrase, ignoreCase = true)
         if (start < 0) {
             append(source)
         } else {
             append(source.substring(0, start))
-            pushStyle(SpanStyle(color = ActionRed, textDecoration = TextDecoration.Underline))
+            pushStyle(SpanStyle(color = primary, textDecoration = TextDecoration.Underline))
             append(source.substring(start, start + phrase.length))
             pop()
             append(source.substring(start + phrase.length))
         }
     }
-    Column(
-        modifier = Modifier.fillMaxWidth().background(PaleRed, RoundedCornerShape(8.dp)).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        SectionLabel("SOURCE")
-        Text(annotated)
+    ContentCard {
+        Eyebrow("Source words")
+        Text(annotated, style = MaterialTheme.typography.bodyLarge)
     }
 }
 
@@ -759,30 +1109,118 @@ private fun DottedTrace() {
         },
         horizontalArrangement = Arrangement.Center,
     ) {
-        repeat(5) { Box(Modifier.padding(horizontal = 4.dp).size(5.dp).background(ActionRed, CircleShape)) }
+        repeat(5) {
+            Box(
+                Modifier
+                    .padding(horizontal = 4.dp)
+                    .size(if (it == 2) 8.dp else 5.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ThreadListCard(threads: List<RecoveryThread>, onOpen: (String) -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(18.dp)),
+    ) {
+        threads.forEachIndexed { index, thread ->
+            ThreadRow(thread, onOpen)
+            if (index != threads.lastIndex) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 18.dp),
+                    color = MaterialTheme.colorScheme.outline,
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun ThreadRow(thread: RecoveryThread, onOpen: (String) -> Unit) {
-    TextButton(onClick = { onOpen(thread.id) }, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(thread.proposedAction, color = Ink, fontWeight = FontWeight.SemiBold)
-            Text(thread.capturedText, color = Gray, maxLines = 2)
+    Surface(
+        onClick = { onOpen(thread.id) },
+        color = Color.Transparent,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(Modifier.size(10.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(thread.proposedAction, style = MaterialTheme.typography.titleMedium)
+                SupportingText(thread.capturedText, maxLines = 2)
+            }
+            ForwardArrow(MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
-    HorizontalDivider(color = Rule)
 }
 
 @Composable
-private fun SettingsSection(label: String, content: @Composable ColumnScope.() -> Unit) {
+private fun SettingsCard(
+    title: String,
+    summary: String? = null,
+    badge: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(20.dp))
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        SectionLabel(label)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(title, style = MaterialTheme.typography.titleLarge, modifier = Modifier.semantics { heading() })
+                summary?.let { SupportingText(it) }
+            }
+            if (badge != null) {
+                Spacer(Modifier.size(12.dp))
+                StatusPill(badge)
+            }
+        }
         content()
-        HorizontalDivider(color = Rule)
+    }
+}
+
+@Composable
+private fun SettingsActionRow(
+    title: String,
+    supporting: String?,
+    onClick: () -> Unit,
+    destructive: Boolean = false,
+) {
+    Surface(
+        onClick = onClick,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 16.dp, vertical = 13.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    title,
+                    color = if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                supporting?.let { SupportingText(it) }
+            }
+            ForwardArrow(
+                if (destructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -790,10 +1228,10 @@ private fun SettingsSection(label: String, content: @Composable ColumnScope.() -
 private fun SwitchCurrentDialog(current: RecoveryThread?, actions: RestartThreadUiActions) {
     AlertDialog(
         onDismissRequest = actions.dismissCurrentSwitch,
-        title = { Text("Move to a different thread?") },
+        title = { Text("Choose what happens to the current thread") },
         text = {
             Text(
-                "Only one thread can be current. “${current?.proposedAction.orEmpty()}” will not be replaced silently.",
+                "Only one thread can be current. “${current?.proposedAction.orEmpty()}” will not be replaced without your choice.",
             )
         },
         confirmButton = {
@@ -812,20 +1250,17 @@ private fun SwitchCurrentDialog(current: RecoveryThread?, actions: RestartThread
     )
 }
 
-private enum class MarkKind { OPEN, COMPACT }
-
 @Composable
-private fun BrandMark(kind: MarkKind, modifier: Modifier = Modifier) {
+private fun BrandMark(modifier: Modifier = Modifier) {
+    val color = MaterialTheme.colorScheme.onBackground
     Canvas(modifier = modifier.semantics { contentDescription = "Restart Thread" }) {
         withTransform({ scale(size.width / 256f, size.height / 256f) }) {
-            when (kind) {
-                MarkKind.OPEN -> drawOpenMark(Ink)
-                MarkKind.COMPACT -> drawCompactMark(Ink)
-            }
+            drawOpenMark(color)
         }
     }
 }
 
+// Canonical geometry from design/assets/logos/mark-01-open-thread.svg.
 private fun DrawScope.drawOpenMark(color: Color) {
     drawPath(
         Path().apply {
@@ -843,8 +1278,8 @@ private fun DrawScope.drawOpenMark(color: Color) {
         },
         color,
     )
-    listOf(22f, 46f, 70f, 94f).forEach { drawCircle(color, 7f, androidx.compose.ui.geometry.Offset(it, 128f)) }
-    drawCircle(color, 34f, androidx.compose.ui.geometry.Offset(148f, 128f))
+    listOf(22f, 46f, 70f, 94f).forEach { drawCircle(color, 7f, Offset(it, 128f)) }
+    drawCircle(color, 34f, Offset(148f, 128f))
     drawPath(
         Path().apply {
             moveTo(198f, 85f); cubicTo(194f, 82f, 189f, 85f, 189f, 90f)
@@ -855,18 +1290,9 @@ private fun DrawScope.drawOpenMark(color: Color) {
     )
 }
 
-private fun DrawScope.drawCompactMark(color: Color) {
-    drawCircle(color, 9f, androidx.compose.ui.geometry.Offset(50f, 128f))
-    drawCircle(color, 9f, androidx.compose.ui.geometry.Offset(80f, 128f))
-    drawCircle(color, 38f, androidx.compose.ui.geometry.Offset(146f, 128f))
-    drawPath(
-        Path().apply {
-            moveTo(204f, 83f); cubicTo(199f, 79f, 193f, 83f, 193f, 89f)
-            lineTo(193f, 167f); cubicTo(193f, 173f, 199f, 177f, 204f, 173f)
-            lineTo(243f, 136f); cubicTo(248f, 132f, 248f, 124f, 243f, 120f); close()
-        },
-        color,
-    )
+private fun ThreadStatus.displayName(): String = when (this) {
+    ThreadStatus.ACTIVE -> "Current"
+    ThreadStatus.COMPLETED -> "Completed"
+    ThreadStatus.ARCHIVED -> "Archived"
+    ThreadStatus.DELETED -> "Deleted"
 }
-
-private fun Modifier.alignStart(): Modifier = this

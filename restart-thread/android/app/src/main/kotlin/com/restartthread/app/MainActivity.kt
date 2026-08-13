@@ -101,6 +101,7 @@ private fun AndroidRestartThreadRoot(
         signOut = authGateway::logout,
         deleteCloudAccount = authGateway::deleteCloudAccount,
         goNow = controller::goNow,
+        goBack = controller::goBack,
         startNewThread = controller::startNewThread,
         resolveCurrentThread = controller::resolveCurrentThread,
         dismissCurrentSwitch = controller::dismissCurrentSwitch,

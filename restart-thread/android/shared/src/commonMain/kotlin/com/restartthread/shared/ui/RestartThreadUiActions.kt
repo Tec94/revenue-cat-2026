@@ -11,6 +11,7 @@ data class RestartThreadUiActions(
     val signOut: () -> Unit,
     val deleteCloudAccount: () -> Unit,
     val goNow: () -> Unit,
+    val goBack: () -> Unit,
     val startNewThread: () -> Unit,
     val resolveCurrentThread: (SwitchCurrentChoice) -> Unit,
     val dismissCurrentSwitch: () -> Unit,

@@ -144,6 +144,31 @@ class RestartThreadController(
         refreshThreads()
     }
 
+    fun goBack() {
+        when (mutableState.value.route) {
+            AppRoute.DATA_PRIVACY -> {
+                mutableState.value = mutableState.value.copy(
+                    route = if (mutableState.value.onboardingComplete) AppRoute.SETTINGS else AppRoute.WELCOME,
+                    message = null,
+                )
+            }
+            AppRoute.RECENTLY_DELETED -> showAllThreads()
+            AppRoute.THREAD_DETAIL -> showAllThreads()
+            AppRoute.ALL_THREADS,
+            AppRoute.SETTINGS,
+            AppRoute.CAPTURE,
+            AppRoute.REVIEW,
+            AppRoute.STARTED,
+            -> goNow()
+            AppRoute.BOOTSTRAP,
+            AppRoute.WELCOME,
+            AppRoute.EXAMPLE_REVIEW,
+            AppRoute.ACCOUNT_OFFER,
+            AppRoute.NOW,
+            -> Unit
+        }
+    }
+
     fun startNewThread() {
         refreshThreads()
         if (mutableState.value.currentThread != null) {
