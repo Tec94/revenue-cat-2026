@@ -5,6 +5,12 @@ import {
 	type RecoveryInput,
 } from "./recovery";
 import { issueInstallationToken, verifyInstallationToken } from "./security";
+import {
+	MissingScopeError,
+	normalizeIssuer,
+	requireScope,
+	verifyAuth0AccessToken,
+} from "./auth0";
 
 type WorkerEnv = Omit<
 	Env,
@@ -14,6 +20,10 @@ type WorkerEnv = Omit<
 	CLOUD_RECOVERY_ENABLED: string;
 	ENVIRONMENT: "development" | "production" | "test";
 	FREE_CLOUD_ALLOWANCE: string;
+	AUTH0_ISSUER_BASE_URL: string;
+	AUTH0_AUDIENCE: string;
+	AUTH0_MANAGEMENT_CLIENT_ID: string;
+	AUTH0_MANAGEMENT_CLIENT_SECRET: string;
 };
 
 interface CloudConfig {
@@ -50,6 +60,14 @@ export default {
 				return await createInstallation(env, requestId);
 			}
 
+			if (request.method === "GET" && url.pathname === "/v1/account/allowance") {
+				return await accountAllowance(request, env, requestId);
+			}
+
+			if (request.method === "DELETE" && url.pathname === "/v1/account") {
+				return await deleteAccount(request, env, requestId);
+			}
+
 			if (
 				request.method === "POST" &&
 				(url.pathname === "/v1/recoveries/text" ||
@@ -60,6 +78,15 @@ export default {
 
 			return json({ error: "not_found", requestId }, 404);
 		} catch (error) {
+			if (error instanceof MissingScopeError) {
+				return json({ error: "insufficient_scope", requestId }, 403);
+			}
+			if (error instanceof AuthFailureError) {
+				return json({ error: "invalid_access_token", requestId }, 401);
+			}
+			if (error instanceof BackendConfigurationError) {
+				return json({ error: "account_service_not_configured", requestId }, 503);
+			}
 			// Never add request bodies, authorization headers, transcript text, or model
 			// output to this log. The request ID is random and contains no user content.
 			console.error(
@@ -73,6 +100,120 @@ export default {
 		}
 	},
 } satisfies ExportedHandler<WorkerEnv>;
+
+async function accountAllowance(
+	request: Request,
+	env: WorkerEnv,
+	requestId: string,
+): Promise<Response> {
+	const account = await authenticateAccount(request, env);
+	requireScope(account, "account:read");
+	const accountKey = await sha256(account.subject);
+	const createdAt = new Date().toISOString();
+	await env.DB.prepare(
+		"INSERT INTO accounts (account_key, created_at) VALUES (?, ?) ON CONFLICT DO NOTHING",
+	)
+		.bind(accountKey, createdAt)
+		.run();
+
+	const config = await loadCloudConfig(env);
+	const windowStart = new Date();
+	windowStart.setUTCDate(windowStart.getUTCDate() - 30);
+	const usage = await env.DB.prepare(
+		`SELECT COUNT(*) AS count FROM recovery_requests
+		 WHERE installation_id = ?
+		   AND status IN ('accepted', 'complete', 'failed')
+		   AND created_at >= ?`,
+	)
+		.bind(`account.${accountKey}`, windowStart.toISOString())
+		.first<{ count: number }>();
+	const used = Number(usage?.count ?? 0);
+	return json({
+		allowance: config.freeAllowance,
+		used,
+		remaining: Math.max(0, config.freeAllowance - used),
+		window: "rolling_30_days",
+		requestId,
+	});
+}
+
+async function deleteAccount(
+	request: Request,
+	env: WorkerEnv,
+	requestId: string,
+): Promise<Response> {
+	const account = await authenticateAccount(request, env);
+	requireScope(account, "account:delete");
+	assertAuth0ManagementConfigured(env);
+	const issuer = normalizeIssuer(env.AUTH0_ISSUER_BASE_URL);
+	const managementToken = await fetchManagementToken(env, issuer);
+	const accountKey = await sha256(account.subject);
+	await env.DB.batch([
+		env.DB.prepare("DELETE FROM installations WHERE id = ?").bind(`account.${accountKey}`),
+		env.DB.prepare("DELETE FROM accounts WHERE account_key = ?").bind(accountKey),
+	]);
+	const response = await fetch(
+		new URL(`api/v2/users/${encodeURIComponent(account.subject)}`, issuer),
+		{
+			method: "DELETE",
+			headers: { authorization: `Bearer ${managementToken}` },
+		},
+	);
+	if (!response.ok && response.status !== 404) {
+		return json({ error: "account_deletion_unavailable", requestId }, 502);
+	}
+	return new Response(null, { status: 204, headers: JSON_HEADERS });
+}
+
+async function authenticateAccount(request: Request, env: WorkerEnv) {
+	const authorization = request.headers.get("authorization");
+	if (!authorization?.startsWith("Bearer ")) throw new AuthFailureError();
+	try {
+		return await verifyAuth0AccessToken(authorization.slice("Bearer ".length), env);
+	} catch (error) {
+		if (error instanceof MissingScopeError) throw error;
+		throw new AuthFailureError();
+	}
+}
+
+class AuthFailureError extends Error {
+	constructor() {
+		super("Invalid Auth0 access token");
+		this.name = "AuthFailureError";
+	}
+}
+
+class BackendConfigurationError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "BackendConfigurationError";
+	}
+}
+
+async function fetchManagementToken(env: WorkerEnv, issuer: string): Promise<string> {
+	const response = await fetch(new URL("oauth/token", issuer), {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({
+			grant_type: "client_credentials",
+			client_id: env.AUTH0_MANAGEMENT_CLIENT_ID,
+			client_secret: env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+			audience: new URL("api/v2/", issuer).toString(),
+		}),
+	});
+	if (!response.ok) throw new Error("Auth0 Management API token request failed");
+	const payload = await response.json<{ access_token?: string }>();
+	if (!payload.access_token) throw new Error("Auth0 Management API token is missing");
+	return payload.access_token;
+}
+
+function assertAuth0ManagementConfigured(env: WorkerEnv): void {
+	if (!env.AUTH0_MANAGEMENT_CLIENT_ID || !env.AUTH0_MANAGEMENT_CLIENT_SECRET) {
+		throw new BackendConfigurationError(
+			"Auth0 Management API credentials are not configured",
+		);
+	}
+}
 
 async function createInstallation(env: WorkerEnv, requestId: string): Promise<Response> {
 	assertSecretConfigured(env);
@@ -118,22 +259,8 @@ async function recover(
 		return json({ error: "missing_installation_token", requestId }, 401);
 	}
 
-	const tokenResult = await verifyInstallationToken(
-		token,
-		env.INSTALLATION_TOKEN_SECRET,
-	);
-	if (!tokenResult.ok) {
-		return json({ error: "invalid_installation_token", requestId }, 401);
-	}
-
-	const installation = await env.DB.prepare(
-		"SELECT id, revoked_at FROM installations WHERE id = ? LIMIT 1",
-	)
-		.bind(tokenResult.installationId)
-		.first<InstallationRecord>();
-	if (!installation || installation.revoked_at) {
-		return json({ error: "inactive_installation", requestId }, 401);
-	}
+	const principal = await recoveryPrincipal(token, env);
+	if (!principal) return json({ error: "invalid_access_token", requestId }, 401);
 
 	const idempotencyKey = request.headers.get("idempotency-key");
 	if (!idempotencyKey || !isUuid(idempotencyKey)) {
@@ -168,7 +295,7 @@ async function recover(
 
 	const reservation = await reserveRecovery(
 		env,
-		installation.id,
+		principal.id,
 		idempotencyKey,
 		requestId,
 		input.mode,
@@ -220,6 +347,44 @@ async function recover(
 			},
 			502,
 		);
+	}
+}
+
+async function recoveryPrincipal(
+	token: string,
+	env: WorkerEnv,
+): Promise<InstallationRecord | null> {
+	if (token.startsWith("v1.")) {
+		const tokenResult = await verifyInstallationToken(
+			token,
+			env.INSTALLATION_TOKEN_SECRET,
+		);
+		if (!tokenResult.ok) return null;
+		const installation = await env.DB.prepare(
+			"SELECT id, revoked_at FROM installations WHERE id = ? LIMIT 1",
+		)
+			.bind(tokenResult.installationId)
+			.first<InstallationRecord>();
+		return installation && !installation.revoked_at ? installation : null;
+	}
+
+	try {
+		const account = await verifyAuth0AccessToken(token, env);
+		requireScope(account, "recovery:create");
+		const accountKey = await sha256(account.subject);
+		const installationId = `account.${accountKey}`;
+		const createdAt = new Date().toISOString();
+		await env.DB.batch([
+			env.DB.prepare(
+				"INSERT INTO accounts (account_key, created_at) VALUES (?, ?) ON CONFLICT DO NOTHING",
+			).bind(accountKey, createdAt),
+			env.DB.prepare(
+				"INSERT INTO installations (id, created_at) VALUES (?, ?) ON CONFLICT DO NOTHING",
+			).bind(installationId, createdAt),
+		]);
+		return { id: installationId, revoked_at: null };
+	} catch {
+		return null;
 	}
 }
 

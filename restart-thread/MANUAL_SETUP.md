@@ -1,130 +1,139 @@
-# Restart Thread setup status
+# Restart Thread manual setup
 
-This is the authoritative owner checklist. It records external account,
-console, device, signing, policy, and legal work that cannot be completed from
-the repository. Do not paste credentials into this file.
+This is the owner checklist for external state that cannot be completed from
+the repository. Status reflects repository verification on August 13, 2026.
+Do not paste credentials into tracked files or chat.
 
-Status was verified on August 12, 2026.
+## Ready in the repository
 
-## Ready now
+- Fresh installs open the value-first Welcome screen, not Capture.
+- The example is in-memory only and calls no storage, network, permission,
+  Auth0, RevenueCat, or content analytics path.
+- Local text, voice, thread lifecycle, Now, history, deletion/restore, process
+  state restoration, adaptive icons, and the Glance widget are implemented.
+- Auth0 Universal Login, encrypted credential storage, RevenueCat identity
+  handoff, and Cloudflare access-token verification are implemented but remain
+  disabled when public Auth0 configuration is blank.
+- Play and Galaxy debug APKs assemble. Shared lifecycle tests and backend tests
+  pass.
+- RevenueCat Test Store Offering `default`, packages, Paywall, Customer Center,
+  and entitlement `pro` were already configured in the prior dashboard audit.
 
-The repository can build the Android Test Store application now:
+## 1. Configure local Android public values
 
-- Kotlin Multiplatform owns the product core and selected Compose UI.
-- `playDebug` uses the configured RevenueCat Test Store public key.
-- RevenueCat Paywall, Customer Center, purchase, restore, entitlement refresh,
-  dismissal, and failure paths are implemented.
-- `playDebug` and the shared Android host tests pass.
-- `galaxyDebug` has a separate native RevenueCat Galaxy adapter.
-- Cloudflare development and production Workers and D1 databases are deployed.
-  Remote recovery remains disabled, so local recovery is the source of truth.
+Copy `android/local.properties.example` to ignored
+`android/local.properties`. Preserve the existing RevenueCat test key. Add the
+Android SDK path and, after the Auth0 and Cloudflare steps below, the public
+Auth0 values and Worker origin.
 
-The live RevenueCat project already contains:
+No Auth0 client secret, RevenueCat secret key, Stripe secret, Google service
+credential, Samsung seller credential, or Cloudflare secret belongs in this
+file.
 
-- a Test Store app;
-- current Offering `default`;
-- `$rc_monthly` mapped to Test Store product `monthly`;
-- `$rc_annual` mapped to Test Store product `yearly`;
-- entitlement `pro`, with both products attached;
-- the published **Restart Thread Pro** Paywall attached to `default`;
-- a default Customer Center configuration;
-- RevenueCat Billing connected to the Stripe account.
+## 2. Create the Auth0 Native application
 
-No sandbox transaction has been recorded yet. The Test Store prices currently
-shown are $9.99 monthly and $79.99 yearly. They are synthetic test prices, not
-the approved launch hypotheses of $4.99 monthly and $39.99 yearly.
+In Auth0:
 
-## Before the first local Android launch
+1. Create a **Native** application for `com.restartthread.app`.
+2. Create an API with the identifier used as `AUTH0_AUDIENCE` and add scopes
+   `account:read`, `account:delete`, and `recovery:create`.
+3. Enable Universal Login's Identifier First profile, Google, and passwordless
+   email OTP.
+4. Add these HTTPS URLs, replacing the tenant domain:
 
-Only a runnable Android target is missing. In Android Studio, do either of the
-following:
+   ```text
+   https://YOUR_DOMAIN/android/com.restartthread.app/callback
+   ```
 
-1. Open Device Manager, install a supported Android system image, and create an
-   emulator; or
-2. connect an Android phone with USB debugging enabled and authorize this PC.
+   Use it in both Allowed Callback URLs and Allowed Logout URLs.
+5. Register package `com.restartthread.app` and every debug/release SHA-256
+   signing-certificate fingerprint under the application's device settings.
+6. Put the Auth0 domain, public Native client ID, and API audience in ignored
+   `android/local.properties`.
 
-Then open `android` in Android Studio and run the `playDebug` variant. The same
-build can be installed from PowerShell after `adb devices` shows the target:
+Obtain the debug fingerprint after an APK exists:
+
+```powershell
+keytool -printcert -jarfile android\app\build\outputs\apk\play\debug\app-play-debug.apk
+```
+
+Auth0 cancellation, missing browser, network failure, invalid identity, and
+expired credentials fall back to optional local use. Test each state on a
+device with a modern browser.
+
+## 3. Configure Cloudflare account identity
+
+Edit the non-secret values in `backend/wrangler.jsonc` for both development
+and production:
+
+- `AUTH0_ISSUER_BASE_URL=https://YOUR_DOMAIN/`
+- `AUTH0_AUDIENCE` equal to the Auth0 API identifier.
+
+Create a separate Auth0 Machine-to-Machine application authorized only for the
+Management API `delete:users` permission. Store its client ID and
+secret as Worker secrets, not mobile values:
+
+```powershell
+cd backend
+cmd /c npx wrangler secret put AUTH0_MANAGEMENT_CLIENT_ID
+cmd /c npx wrangler secret put AUTH0_MANAGEMENT_CLIENT_SECRET
+cmd /c npm run d1:migrate:dev
+cmd /c npm run d1:migrate:production
+cmd /c npm run deploy
+cmd /c npm run deploy:production
+```
+
+Set `BACKEND_BASE_URL` in Android to the chosen deployed Worker origin. Then
+prove allowance lookup and deletion with a real Auth0 access token. Account
+deletion must remove Auth0/D1 account data while leaving local threads intact.
+
+## 4. Run locally
+
+Create or connect an Android target. Use a Google APIs emulator image with a
+modern browser for Auth0; use a physical Galaxy device for Samsung checkout
+and OEM behavior.
+
+Open `android` in Android Studio, select `playDebug`, and run the `app`
+configuration. Or use:
 
 ```powershell
 cd android
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 .\gradlew.bat installPlayDebug
 ```
 
-Google Play Console verification is not required for this first launch or for
-RevenueCat Test Store purchases.
+Verify before feature work continues:
 
-## First Test Store subscription test
+1. Fresh install opens Welcome and both value paths complete.
+2. Denying microphone leaves text capture fully usable.
+3. A real Start appears on Now and in the home widget.
+4. Return and Update widget actions open the exact current record.
+5. App, round, and themed launcher icons render without stale launcher cache.
+6. Auth0 login changes RevenueCat to the Auth0 `sub`; logout returns to an
+   anonymous RevenueCat identity without deleting local threads.
+7. RevenueCat Test Store purchase, restore, relaunch, and Customer Center keep
+   entitlement `pro` consistent.
 
-The RevenueCat dashboard is ready for its first end-to-end sandbox proof. The
-published value-first Paywall contains no trial, scarcity, unlimited-use, or
-unsupported savings claim. It retains a close control, Restore Purchases,
-Terms, and Privacy. The app exposes it only after the verified restart state.
+## 5. Store accounts and billing
 
-Run this sandbox proof:
+Google Play account verification and app creation are still required for real
+Play billing. Create `monthly` and `yearly`, connect Play credentials to
+RevenueCat, upload a signed AAB to a testing track, and add license testers.
 
-1. Complete a recovery and open **Explore Restart Thread Pro**.
-2. Confirm monthly and annual packages render from Offering `default`.
-3. Close the paywall and confirm the recovery remains available.
-4. Purchase either Test Store package and confirm the app returns to recovery.
-5. Confirm `pro` is active in the RevenueCat customer record.
-6. Relaunch and confirm Pro remains active.
-7. Open Customer Center and test restore.
-8. Repeat purchase cancellation and simulated failure paths.
+Samsung Seller Portal, the Galaxy app/catalog, RevenueCat Galaxy app/key, and a
+physical Galaxy purchase remain required. A Play purchase or emulator does not
+prove Samsung Checkout.
 
-## Before real Google Play billing
+Stripe is connected through RevenueCat Billing, but usable web checkout still
+needs web products and the same Auth0/RevenueCat identity proof. Keep all
+Stripe secrets server-side.
 
-Your Google Play developer account exists and is still being verified. After
-verification:
+## 6. Release gates
 
-1. Create the app with application ID `com.restartthread.app` and enable Play
-   App Signing.
-2. Create `monthly` and `yearly` subscriptions and their base plans. Start with
-   the approved price hypotheses and no launch trial; validate prices before
-   production.
-3. Add the Play app and service credential to RevenueCat, then map both store
-   products to `pro` and Offering `default`.
-4. Put the public `goog_...` SDK key in ignored `android/local.properties` as
-   `REVENUECAT_PLAY_API_KEY`. Never place service-account credentials in the
-   app.
-5. Create a signed AAB, upload it to a Play testing track, add license testers,
-   and satisfy the testing requirements shown in your Play Console account.
-6. Prove purchase, pending purchase, restore, grace period, cancellation,
-   expiry, offline cache, reinstall, and account switching.
-
-## Before Galaxy billing
-
-1. Create and verify the Samsung Seller Portal account.
-2. Create the Galaxy app and its `monthly` and `yearly` subscriptions.
-3. Add a RevenueCat Galaxy app, map both products to `pro`, and give RevenueCat
-   the required server-side seller credential.
-4. Put only the public `galx_...` key in ignored
-   `android/local.properties` as `REVENUECAT_GALAXY_API_KEY`.
-5. Test the signed Galaxy build on a physical Galaxy device. An emulator or a
-   Play purchase does not prove Samsung Checkout.
-
-## RevenueCat Billing and Stripe
-
-Stripe is connected inside RevenueCat Billing as the web payment gateway. No
-web products are configured, so web checkout is not part of the local Android
-test or launch slice. Before enabling it, create the web products, define how a
-web purchase maps to `pro`, and prove the account or redemption path that lets
-the app find the same customer. Keep Stripe and RevenueCat secret keys on the
-server; the mobile app must never contain them.
-
-## Cloudflare, iOS, and release work
-
-Cloudflare is provisioned but intentionally feature-gated. Before enabling
-remote recovery, review processor terms and the privacy policy, confirm the D1
-location decision, and pass the audio CPU, grounding, negation, abuse, and
-fallback tests documented in `backend/README.md`.
-
-The iOS host still requires MacinCloud, Xcode project creation, Apple Developer
-enrollment, signing, native recording and protected storage, an `appl_...`
-RevenueCat public key, and simulator plus physical-device proof. Follow
-`iosApp/README.md`.
-
-Before any public store submission, also complete the privacy policy, support
-and deletion/export instructions, accessibility checks, formative usability
-study, app icon, screenshots, descriptions, tester instructions, and signed
-release builds.
+Before public release, replace the placeholder privacy, terms, and support
+URLs in `MainActivity.kt`; publish those pages; test account deletion; finish
+Play/Galaxy data-safety forms; verify accessibility at large text and with
+TalkBack; test fold, landscape, multi-window, reduced motion, and physical
+Galaxy widget behavior; create signing assets and store listings; and complete
+the planned usability study. Lock-screen recording remains excluded until
+physical-device behavior is proven.

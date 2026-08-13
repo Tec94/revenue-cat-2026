@@ -114,6 +114,44 @@ class RevenueCatSubscriptionController(enabled: Boolean) {
         }
     }
 
+    fun identify(appUserId: String) {
+        val configuredPurchases = purchases ?: return
+        if (appUserId.isBlank()) return
+        configuredPurchases.logIn(
+            newAppUserID = appUserId,
+            onError = {
+                mutableState.value = mutableState.value.copy(
+                    statusMessage = "Pro status couldn't be linked to this account yet.",
+                )
+            },
+            onSuccess = { customerInfo, _ ->
+                acceptCustomerInfo(customerInfo)
+                refresh()
+            },
+        )
+    }
+
+    fun useAnonymousIdentity() {
+        val configuredPurchases = purchases ?: return
+        if (configuredPurchases.isAnonymous) return
+        configuredPurchases.logOut(
+            onError = {
+                mutableState.value = mutableState.value.copy(
+                    statusMessage = "Pro identity couldn't be cleared yet. Try again before switching accounts.",
+                )
+            },
+            onSuccess = ::acceptCustomerInfo,
+        )
+    }
+
+    fun restorePurchases() {
+        val configuredPurchases = purchases ?: return
+        configuredPurchases.restorePurchases(
+            onError = { reportRestoreFailure() },
+            onSuccess = ::acceptCustomerInfo,
+        )
+    }
+
     internal fun acceptCustomerInfo(customerInfo: CustomerInfo) {
         mutableState.value = mutableState.value.copy(
             isPro = RevenueCatIds.PRO_ENTITLEMENT in customerInfo.entitlements.active,

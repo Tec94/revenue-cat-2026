@@ -32,6 +32,14 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders += mapOf(
+            "auth0Domain" to localValue("AUTH0_DOMAIN").ifBlank { "restart-thread.invalid" },
+            "auth0Scheme" to "https",
+        )
+        buildConfigField("String", "AUTH0_DOMAIN", quoted(localValue("AUTH0_DOMAIN")))
+        buildConfigField("String", "AUTH0_CLIENT_ID", quoted(localValue("AUTH0_CLIENT_ID")))
+        buildConfigField("String", "AUTH0_AUDIENCE", quoted(localValue("AUTH0_AUDIENCE")))
+        buildConfigField("String", "BACKEND_BASE_URL", quoted(localValue("BACKEND_BASE_URL")))
     }
 
     flavorDimensions += "store"
@@ -87,6 +95,10 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("androidx.compose.material3:material3:1.4.0")
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    implementation("com.auth0.android:auth0:3.19.0")
+    implementation("com.auth0.android:jwtdecode:2.1.0")
 
     implementation("com.revenuecat.purchases:purchases:10.16.1")
     add("galaxyImplementation", "com.revenuecat.purchases:purchases-store-galaxy:10.16.1")

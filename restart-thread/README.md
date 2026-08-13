@@ -1,50 +1,58 @@
 # Restart Thread
 
-Restart Thread is an Android-first, local-first recovery app built with Kotlin
-Multiplatform. The first slice commits a user's text or voice state to
-protected device storage before it offers any next action or optional cloud
-processing.
+Restart Thread is an Android-first, local-first recovery app. A user records or
+types where they stopped, checks one proposed next action, and returns to that
+thread without losing context.
 
-## Projects
+The current implementation uses Kotlin Multiplatform with selectively shared
+Compose UI. Android owns Auth0 Universal Login, microphone and recording,
+encrypted storage, launcher assets, app-widget behavior, intents, and
+store-specific billing. Cloudflare is the selected account and optional remote
+processing boundary; thread text and audio remain on the device.
 
-- `DESIGN.md` — canonical Forward Thread visual, component, motion, tactile,
-  sound, accessibility, and platform specification.
-- `android/shared/` — Kotlin Multiplatform domain logic, presentation state,
-  selected Compose UI, and RevenueCat subscription UI for Play and iOS.
-- `android/app/` — native Android host, permissions, recording, encrypted
-  vault, Play/Galaxy flavors, and the native Galaxy RevenueCat adapter and UI.
-- `iosApp/` — SwiftUI host integration notes and a bridge template for the
-  shared Compose experience. Xcode project creation remains a Mac step.
-- `backend/` — the selected Cloudflare Worker, D1 operational metadata, and
-  Workers AI adapter. Remote recovery is feature-gated and user content is not
-  persisted.
-- `design/` — semantic tokens, reconstructed SVG logo candidates, and the
-  locked prototype reference.
-- `MANUAL_SETUP.md` — authoritative current status and remaining owner-only
-  account, console, device, signing, policy, and legal work.
-- `KMP_ARCHITECTURE.md` — shared/native ownership rules and migration map.
-- `REVENUECAT_SETUP.md` — concise subscription contract, live dashboard audit,
-  paywall specification, and verification procedure.
+## What is implemented
 
-Cloudflare is the selected remote backend, not a fallback provider. Its use in
-the current app flow is optional because Restart Thread must work locally and
-save before any remote request. Development and production Workers and D1
-databases are provisioned, while both cloud-recovery controls remain off.
+- value-first onboarding with a disposable interactive example;
+- optional Auth0 account offer after the first demonstrated value;
+- Now, capture, review, verified Start, history, detail, search, archive,
+  completion, export, deletion, restore, and Recently Deleted screens;
+- one-current-thread enforcement with an explicit switch decision;
+- encrypted vault migration from the existing v1 record to lifecycle-aware v2;
+- Play and Galaxy RevenueCat paths for entitlement `pro`, Paywall, Customer
+  Center, restore, and Auth0 identity handoff;
+- adaptive, round, and themed launcher art from the canonical SVG mark;
+- a responsive Jetpack Glance home widget with exact Return, Update, and Leave
+  routes;
+- Cloudflare Auth0 JWT verification, account allowance status, and cloud-account
+  deletion without receiving thread content.
 
-## Local verification
+## Repository map
+
+- `android/shared` — thread domain, route coordinator, shared Compose UI, and
+  RevenueCat KMP behavior.
+- `android/app` — Android host, Auth0, encrypted vault, recording, launcher,
+  widget, deep links, haptics, Play, and Galaxy adapters.
+- `backend` — Cloudflare Worker, D1 migrations, Auth0 API boundary, and optional
+  Workers AI recovery path.
+- `design` and `DESIGN.md` — canonical brand assets and Forward Thread system.
+- `MANUAL_SETUP.md` — owner-only console, credential, device, and store work.
+- `KMP_ARCHITECTURE.md` and `REVENUECAT_SETUP.md` — implementation contracts.
+
+## Verification
+
+Use Android Studio's bundled JDK when the system JDK causes Windows ZIP-file
+locks.
 
 ```powershell
 cd backend
 cmd /c npm run check
 
 cd ..\android
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 .\gradlew.bat :shared:testAndroidHostTest :app:assemblePlayDebug
 .\gradlew.bat :app:assembleGalaxyDebug
 ```
 
-Do not add secrets to tracked files. The Play debug APK builds and the Test
-Store catalog, entitlement `pro`, and published Paywall for Offering `default`
-are ready. The remaining local proof is an end-to-end Test Store purchase and
-restore on an emulator or device. Real Play billing, Galaxy billing, and cloud
-recovery remain inactive until their external account and proof gates are
-complete.
+See `MANUAL_SETUP.md` before attempting Auth0, a real purchase, Cloudflare
+account deletion, a physical Galaxy test, or a store submission. Never commit
+`android/local.properties`, `backend/.env`, signing files, or server secrets.

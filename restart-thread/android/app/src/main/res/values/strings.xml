@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">Restart Thread</string>
+    <string name="widget_description">Return to the current thread or leave a new stopping point.</string>
 </resources>
-

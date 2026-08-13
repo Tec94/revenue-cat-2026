@@ -2,12 +2,17 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "restart-thread-api",
 	"main": "src/index.ts",
-	"compatibility_date": "2026-08-12",
+	"compatibility_date": "2026-08-13",
+	"compatibility_flags": ["nodejs_compat"],
 	"observability": {
 		"enabled": true
 	},
 	"secrets": {
-		"required": ["INSTALLATION_TOKEN_SECRET"]
+		"required": [
+			"INSTALLATION_TOKEN_SECRET",
+			"AUTH0_MANAGEMENT_CLIENT_ID",
+			"AUTH0_MANAGEMENT_CLIENT_SECRET"
+		]
 	},
 	"ai": {
 		"binding": "AI"
@@ -24,13 +29,19 @@
 		"AI_MODE": "deterministic",
 		"CLOUD_RECOVERY_ENABLED": "false",
 		"ENVIRONMENT": "development",
-		"FREE_CLOUD_ALLOWANCE": "7"
+		"FREE_CLOUD_ALLOWANCE": "7",
+		"AUTH0_ISSUER_BASE_URL": "https://configure-me.invalid/",
+		"AUTH0_AUDIENCE": "https://api.restartthread.app"
 	},
 	"env": {
 		"production": {
 			"name": "restart-thread-api-production",
 			"secrets": {
-				"required": ["INSTALLATION_TOKEN_SECRET"]
+				"required": [
+					"INSTALLATION_TOKEN_SECRET",
+					"AUTH0_MANAGEMENT_CLIENT_ID",
+					"AUTH0_MANAGEMENT_CLIENT_SECRET"
+				]
 			},
 			"ai": {
 				"binding": "AI"
@@ -47,7 +58,9 @@
 				"AI_MODE": "deterministic",
 				"CLOUD_RECOVERY_ENABLED": "false",
 				"ENVIRONMENT": "production",
-				"FREE_CLOUD_ALLOWANCE": "7"
+				"FREE_CLOUD_ALLOWANCE": "7",
+				"AUTH0_ISSUER_BASE_URL": "https://configure-me.invalid/",
+				"AUTH0_AUDIENCE": "https://api.restartthread.app"
 			}
 		}
 	}

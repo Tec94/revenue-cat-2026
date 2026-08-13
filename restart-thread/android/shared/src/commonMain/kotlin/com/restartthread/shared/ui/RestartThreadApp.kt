@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import com.restartthread.shared.billing.RevenueCatSubscriptionController
 import com.restartthread.shared.billing.SubscriptionUiState
 import com.restartthread.shared.presentation.MainUiState
+import com.restartthread.shared.presentation.AuthUiState
+import com.restartthread.shared.presentation.MicrophonePermissionState
 import com.revenuecat.purchases.kmp.models.CustomerInfo
 import com.revenuecat.purchases.kmp.models.PurchasesError
 import com.revenuecat.purchases.kmp.models.StoreTransaction
@@ -25,13 +27,10 @@ private enum class SubscriptionSurface { APP, PAYWALL, CUSTOMER_CENTER }
 @Composable
 fun RestartThreadApp(
     state: MainUiState,
+    authState: AuthUiState,
+    microphonePermission: MicrophonePermissionState,
     subscriptions: RevenueCatSubscriptionController?,
-    onInput: (String) -> Unit,
-    onSave: () -> Unit,
-    onVoice: () -> Unit,
-    onAction: (String) -> Unit,
-    onStart: () -> Unit,
-    onReset: () -> Unit,
+    actions: RestartThreadUiActions,
 ) {
     var subscriptionState by remember { mutableStateOf(SubscriptionUiState()) }
     var surface by remember { mutableStateOf(SubscriptionSurface.APP) }
@@ -91,6 +90,8 @@ fun RestartThreadApp(
 
         SubscriptionSurface.APP -> RestartThreadScreen(
             state = state,
+            authState = authState,
+            microphonePermission = microphonePermission,
             subscriptionState = subscriptionState,
             onUpgrade = if (subscriptionState.canPresentPaywall) {
                 { surface = SubscriptionSurface.PAYWALL }
@@ -102,12 +103,9 @@ fun RestartThreadApp(
             } else {
                 null
             },
-            onInput = onInput,
-            onSave = onSave,
-            onVoice = onVoice,
-            onAction = onAction,
-            onStart = onStart,
-            onReset = onReset,
+            actions = actions.copy(
+                restorePurchases = { subscriptions?.restorePurchases() },
+            ),
         )
     }
 }

@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.restartthread.shared.domain.RecoveryThread
 import com.restartthread.shared.domain.SourceKind
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -24,5 +25,6 @@ class EncryptedThreadVaultTest {
         vault.saveThread(thread)
 
         assertEquals(thread, vault.loadThread(thread.id))
+        assertTrue(vault.listThreads().any { it.id == thread.id })
     }
 }

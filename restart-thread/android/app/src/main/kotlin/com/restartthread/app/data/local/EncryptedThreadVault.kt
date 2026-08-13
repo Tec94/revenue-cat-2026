@@ -6,6 +6,7 @@ import android.security.keystore.KeyProperties
 import android.util.AtomicFile
 import com.restartthread.shared.domain.RecoveryThread
 import com.restartthread.shared.domain.SourceKind
+import com.restartthread.shared.domain.ThreadStatus
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.DataInputStream
@@ -34,6 +35,18 @@ class EncryptedThreadVault(context: Context) {
         val file = File(directory, "$id.thread")
         if (!file.exists()) return null
         return decodeThread(readEncrypted(file))
+    }
+
+    fun listThreads(): List<RecoveryThread> =
+        directory.listFiles { file -> file.isFile && file.extension == "thread" }
+            .orEmpty()
+            .mapNotNull { file -> runCatching { decodeThread(readEncrypted(file)) }.getOrNull() }
+            .sortedByDescending(RecoveryThread::updatedAtEpochMs)
+
+    fun permanentlyDeleteThread(id: String): Boolean {
+        val threadDeleted = File(directory, "$id.thread").let { !it.exists() || it.delete() }
+        val voiceDeleted = File(directory, "$id.m4a.enc").let { !it.exists() || it.delete() }
+        return threadDeleted && voiceDeleted
     }
 
     private fun writeEncrypted(file: File, plain: ByteArray) {
@@ -109,14 +122,18 @@ class EncryptedThreadVault(context: Context) {
     private fun encodeThread(thread: RecoveryThread): ByteArray =
         ByteArrayOutputStream().use { bytes ->
             DataOutputStream(bytes).use { output ->
-                output.writeInt(FORMAT_VERSION)
+                output.writeInt(THREAD_FORMAT_VERSION)
                 output.writeUTF(thread.id)
                 output.writeLong(thread.createdAtEpochMs)
+                output.writeLong(thread.updatedAtEpochMs)
                 output.writeUTF(thread.sourceKind.name)
                 output.writeUTF(thread.capturedText)
                 output.writeUTF(thread.proposedAction)
                 output.writeBoolean(thread.startedAtEpochMs != null)
                 thread.startedAtEpochMs?.let(output::writeLong)
+                output.writeUTF(thread.status.name)
+                output.writeBoolean(thread.deletedFromStatus != null)
+                thread.deletedFromStatus?.let { output.writeUTF(it.name) }
             }
             bytes.toByteArray()
         }
@@ -124,15 +141,41 @@ class EncryptedThreadVault(context: Context) {
     private fun decodeThread(bytes: ByteArray): RecoveryThread =
         try {
             DataInputStream(ByteArrayInputStream(bytes)).use { input ->
-                check(input.readInt() == FORMAT_VERSION)
-                RecoveryThread(
-                    id = input.readUTF(),
-                    createdAtEpochMs = input.readLong(),
-                    sourceKind = SourceKind.valueOf(input.readUTF()),
-                    capturedText = input.readUTF(),
-                    proposedAction = input.readUTF(),
-                    startedAtEpochMs = if (input.readBoolean()) input.readLong() else null,
-                )
+                when (val version = input.readInt()) {
+                    1 -> {
+                        val id = input.readUTF()
+                        val createdAt = input.readLong()
+                        val source = SourceKind.valueOf(input.readUTF())
+                        val captured = input.readUTF()
+                        val action = input.readUTF()
+                        val startedAt = if (input.readBoolean()) input.readLong() else null
+                        RecoveryThread(
+                            id = id,
+                            createdAtEpochMs = createdAt,
+                            updatedAtEpochMs = startedAt ?: createdAt,
+                            sourceKind = source,
+                            capturedText = captured,
+                            proposedAction = action,
+                            startedAtEpochMs = startedAt,
+                        )
+                    }
+                    THREAD_FORMAT_VERSION -> RecoveryThread(
+                        id = input.readUTF(),
+                        createdAtEpochMs = input.readLong(),
+                        updatedAtEpochMs = input.readLong(),
+                        sourceKind = SourceKind.valueOf(input.readUTF()),
+                        capturedText = input.readUTF(),
+                        proposedAction = input.readUTF(),
+                        startedAtEpochMs = if (input.readBoolean()) input.readLong() else null,
+                        status = ThreadStatus.valueOf(input.readUTF()),
+                        deletedFromStatus = if (input.readBoolean()) {
+                            ThreadStatus.valueOf(input.readUTF())
+                        } else {
+                            null
+                        },
+                    )
+                    else -> error("Unsupported thread format $version")
+                }
             }
         } finally {
             bytes.fill(0)
@@ -144,5 +187,6 @@ class EncryptedThreadVault(context: Context) {
         const val KEY_ALIAS = "restart_thread_vault_v1"
         const val TRANSFORMATION = "AES/GCM/NoPadding"
         const val FORMAT_VERSION = 1
+        const val THREAD_FORMAT_VERSION = 2
     }
 }

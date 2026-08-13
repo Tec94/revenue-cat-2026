@@ -9,13 +9,19 @@ import androidx.compose.runtime.setValue
 import com.restartthread.shared.billing.RevenueCatIds
 import com.restartthread.shared.billing.SubscriptionUiState
 import com.restartthread.shared.presentation.MainUiState
+import com.restartthread.shared.presentation.AuthUiState
+import com.restartthread.shared.presentation.MicrophonePermissionState
 import com.restartthread.shared.ui.RestartThreadScreen
+import com.restartthread.shared.ui.RestartThreadUiActions
 import com.revenuecat.purchases.CustomerInfo
 import com.revenuecat.purchases.Offering
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesError
 import com.revenuecat.purchases.getCustomerInfoWith
 import com.revenuecat.purchases.getOfferingsWith
+import com.revenuecat.purchases.logInWith
+import com.revenuecat.purchases.logOutWith
+import com.revenuecat.purchases.interfaces.ReceiveCustomerInfoCallback
 import com.revenuecat.purchases.models.StoreTransaction
 import com.revenuecat.purchases.ui.revenuecatui.Paywall
 import com.revenuecat.purchases.ui.revenuecatui.PaywallListener
@@ -27,12 +33,9 @@ private enum class GalaxySubscriptionSurface { APP, PAYWALL, CUSTOMER_CENTER }
 @Composable
 fun StoreSubscriptionApp(
     state: MainUiState,
-    onInput: (String) -> Unit,
-    onSave: () -> Unit,
-    onVoice: () -> Unit,
-    onAction: (String) -> Unit,
-    onStart: () -> Unit,
-    onReset: () -> Unit,
+    authState: AuthUiState,
+    microphonePermission: MicrophonePermissionState,
+    actions: RestartThreadUiActions,
 ) {
     val isConfigured = Purchases.isConfigured
     var customerInfoFailed by remember { mutableStateOf(false) }
@@ -108,6 +111,30 @@ fun StoreSubscriptionApp(
     LaunchedEffect(isConfigured) {
         refresh()
     }
+    LaunchedEffect(authState.userId, isConfigured) {
+        if (!isConfigured) return@LaunchedEffect
+        val userId = authState.userId
+        if (userId != null) {
+            Purchases.sharedInstance.logInWith(
+                appUserID = userId,
+                onError = {
+                    subscriptionState = subscriptionState.copy(
+                        statusMessage = "Pro status couldn't be linked to this account yet.",
+                    )
+                },
+                onSuccess = { customerInfo, _ -> acceptCustomerInfo(customerInfo) },
+            )
+        } else if (!Purchases.sharedInstance.isAnonymous) {
+            Purchases.sharedInstance.logOutWith(
+                onError = {
+                    subscriptionState = subscriptionState.copy(
+                        statusMessage = "Pro identity couldn't be cleared yet.",
+                    )
+                },
+                onSuccess = ::acceptCustomerInfo,
+            )
+        }
+    }
 
     when (surface) {
         GalaxySubscriptionSurface.PAYWALL -> {
@@ -161,6 +188,8 @@ fun StoreSubscriptionApp(
 
         GalaxySubscriptionSurface.APP -> RestartThreadScreen(
             state = state,
+            authState = authState,
+            microphonePermission = microphonePermission,
             subscriptionState = subscriptionState,
             onUpgrade = if (subscriptionState.canPresentPaywall) {
                 { surface = GalaxySubscriptionSurface.PAYWALL }
@@ -172,12 +201,25 @@ fun StoreSubscriptionApp(
             } else {
                 null
             },
-            onInput = onInput,
-            onSave = onSave,
-            onVoice = onVoice,
-            onAction = onAction,
-            onStart = onStart,
-            onReset = onReset,
+            actions = actions.copy(
+                restorePurchases = {
+                    if (isConfigured) {
+                        Purchases.sharedInstance.restorePurchases(
+                            object : ReceiveCustomerInfoCallback {
+                                override fun onError(error: PurchasesError) {
+                                subscriptionState = subscriptionState.copy(
+                                    statusMessage = "Purchases couldn't be restored right now.",
+                                )
+                                }
+
+                                override fun onReceived(customerInfo: CustomerInfo) {
+                                    acceptCustomerInfo(customerInfo)
+                                }
+                            },
+                        )
+                    }
+                },
+            ),
         )
     }
 }

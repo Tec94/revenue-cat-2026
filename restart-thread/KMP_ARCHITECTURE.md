@@ -3,91 +3,62 @@
 ## Decision
 
 Restart Thread uses Kotlin Multiplatform with selectively shared Compose UI.
-Android remains the first release and evidence platform. The shared module owns
-behavior that should remain identical on Android and iOS. OS capabilities and
-store-specific adapters stay native.
+Android remains the first release and evidence platform. Product behavior is
+shared; operating-system and store capabilities stay native.
 
 ```mermaid
 flowchart LR
-    A["Android Compose host"] --> S["KMP shared module"]
-    I["iOS SwiftUI host"] --> S
-    A --> AN["Android native capabilities"]
-    I --> IN["iOS native capabilities"]
-    S --> R["RevenueCat KMP: Play and iOS"]
-    AN --> G["RevenueCat native Galaxy adapter"]
-    S -. "optional HTTPS after local save" .-> C["Cloudflare Worker"]
-    C --> D["D1 metadata"]
-    C --> W["Workers AI"]
+    UI["Shared Compose routes and screens"] --> D["Thread domain and controller"]
+    A["Android host"] --> UI
+    A --> N["Auth0, vault, recorder, widget, intents, haptics"]
+    UI --> RK["RevenueCat KMP for Play and future iOS"]
+    A --> RG["Native RevenueCat Galaxy adapter"]
+    A -. "account token; no thread content" .-> C["Cloudflare Worker"]
+    C --> DB["D1 account and operational metadata"]
 ```
-
-Cloudflare is the selected remote service. The remote path remains optional at
-runtime, and the app must save locally before attempting a remote call.
 
 ## Shared ownership
 
-The `android/shared` module owns:
+`android/shared` owns:
 
-- recovery thread and draft models;
-- deterministic first-step generation;
-- capture, review, and started presentation state;
-- the current capture/recovery Compose screen and its adaptive layout;
-- RevenueCat customer information, `pro` entitlement state, Offering loading,
-  Play/iOS Paywall, and Customer Center surfaces;
-- the platform interface used by the presentation controller.
+- routes and per-screen state for onboarding, Now, capture, review, Start,
+  history, detail, deletion, settings, and privacy;
+- the one-current-thread rule and lifecycle transitions;
+- recovery models and deterministic local first-step drafting;
+- shared Compose design, accessibility semantics, and responsive layout;
+- RevenueCat KMP Offering, `pro` entitlement, Paywall, Customer Center,
+  purchase restoration, and identity changes;
+- a small platform interface for storage, recording, export, and haptics.
 
-These choices make the product's core promise, provenance, and state behavior
-portable without forcing every screen or capability into shared code.
+## Native Android ownership
 
-## Native ownership
+`android/app` owns:
 
-Each platform host owns:
+- Auth0 Universal Login and secure credentials;
+- microphone permission choreography and recording;
+- Android Keystore encryption, file enumeration, and v1-to-v2 record decoding;
+- launcher/adaptive/themed icons, Jetpack Glance widget, app intents, and pinning;
+- lifecycle state restoration through `SavedStateHandle`;
+- public configuration injection from ignored `local.properties`;
+- Play and Galaxy store selection, with Galaxy's native RevenueCat adapter.
 
-- microphone permission and recording APIs;
-- protected local storage and cryptographic key handling;
-- lock-screen, widget, notification, shortcut, haptic, and sound surfaces;
-- app lifecycle and platform navigation;
-- accessibility behavior that requires native APIs;
-- RevenueCat public app-key injection and store selection;
-- Galaxy Store purchases and store-specific diagnostics through RevenueCat's
-  native Galaxy adapter;
-- platform review declarations and store submission configuration.
+The vault remains file based. This screen expansion does not introduce a
+database. Only one active record is retained; extra legacy active records are
+normalized to archived during refresh.
 
-The Android implementation is in `android/app`. The future iOS implementation
-conforms to `RestartThreadPlatform` in Swift and injects it into the shared
-`MainViewController`.
+## Identity and backend boundary
 
-## Dependency rule
+Auth0's stable `sub` becomes the RevenueCat App User ID after login. Logout
+returns RevenueCat to an anonymous identity and retains all local threads.
+Cloudflare validates the access-token signature, issuer, audience, expiry, and
+scope before account allowance or deletion operations. D1 stores only a SHA-256
+account key and content-free usage metadata. It never stores the Auth0 `sub`,
+thread text, audio, or recovery output.
 
-The shared module may import RevenueCat's KMP core, result, and UI artifacts.
-It must not import Android, UIKit, AVFoundation, StoreKit, Google Play Billing,
-Samsung Checkout, or RevenueCat's native Galaxy artifact. Native hosts may
-depend on the shared module. The shared module must never depend on a host.
+## Later iOS work
 
-Play and iOS use the shared RevenueCat KMP subscription path. Galaxy remains on
-RevenueCat's native Android Galaxy configuration because the KMP integration
-does not currently provide that store-specific setup. All stores map to the
-same logical `pro` entitlement.
-
-## Source map
-
-| Responsibility | Location |
-| --- | --- |
-| Domain and deterministic recovery | `android/shared/src/commonMain/.../domain` |
-| Cross-platform state controller | `android/shared/src/commonMain/.../presentation` |
-| Selected shared Compose UI | `android/shared/src/commonMain/.../ui` |
-| Play/iOS subscription controller | `android/shared/src/commonMain/.../billing` |
-| Compose host for UIKit | `android/shared/src/iosMain/.../MainViewController.kt` |
-| Android permission choreography | `android/app/.../MainActivity.kt` |
-| Android vault and recorder adapter | `android/app/.../platform` and `data/local` |
-| Play/Galaxy key and store configuration | `android/app/build.gradle.kts` |
-| Native Galaxy RevenueCat adapter and UI | `android/app/src/galaxy/.../billing` |
-| Selected remote boundary | `backend` |
-
-## Next iOS slice
-
-The first iOS slice should host the existing shared screen, implement the
-platform interface with native recording and protected storage, and verify the
-save-before-recovery invariant. Lock-screen capture and Apple purchases remain
-separate proof slices after that. RevenueCat's shared UI is already wired; the
-iOS host must inject its Apple public SDK key and set an iOS 15 deployment
-target. This ordering does not change the Android-first release target.
+The shared routes and UI are portable. The iOS host still needs native Auth0
+presentation, Keychain/protected-file storage, recording, app links, haptics,
+widgets or Live Activities, Apple RevenueCat configuration, signing, and device
+proof. Android-specific code must not be moved into the shared module merely to
+reduce file count.

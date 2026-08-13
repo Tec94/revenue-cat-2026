@@ -1,0 +1,15 @@
+# Copy to local.properties. The destination is ignored by Git.
+sdk.dir=C:\\Users\\YOUR_NAME\\AppData\\Local\\Android\\Sdk
+
+# RevenueCat public SDK keys only. Never put secret API or store credentials here.
+REVENUECAT_TEST_API_KEY=test_...
+REVENUECAT_PLAY_API_KEY=goog_...
+REVENUECAT_GALAXY_API_KEY=galx_...
+
+# Auth0 Native application public configuration. Domain has no https:// prefix.
+AUTH0_DOMAIN=YOUR_TENANT.us.auth0.com
+AUTH0_CLIENT_ID=YOUR_PUBLIC_NATIVE_CLIENT_ID
+AUTH0_AUDIENCE=https://api.restartthread.app
+
+# Deployed Worker origin, with no trailing slash.
+BACKEND_BASE_URL=https://restart-thread-api.example.workers.dev
