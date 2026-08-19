@@ -23,8 +23,8 @@ public struct RestartThreadRootView: View {
                     BrandHeader(
                         showBack: showBack,
                         showSettings: showSettings,
-                        onBack: controller.goBack,
-                        onSettings: model.openSettings
+                        onBack: { controller.goBack() },
+                        onSettings: { model.openSettings() }
                     )
                     .padding(.bottom, 28)
                 }
@@ -52,11 +52,11 @@ public struct RestartThreadRootView: View {
         ) {
             Button("Complete and continue") { controller.resolveCurrentThread(.complete) }
             Button("Archive and continue") { controller.resolveCurrentThread(.archive) }
-            Button("Cancel", role: .cancel, action: controller.dismissCurrentSwitch)
+            Button("Cancel", role: .cancel) { controller.dismissCurrentSwitch() }
         } message: {
             Text("Only one thread can be current. \"\(controller.state.currentThread?.proposedAction ?? "Current thread")\" will not be replaced without your choice.")
         }
-        .sheet(item: $model.subscriptionSurface, onDismiss: model.dismissSubscriptionSurface) { surface in
+        .sheet(item: $model.subscriptionSurface, onDismiss: { model.dismissSubscriptionSurface() }) { surface in
             switch surface {
             case .paywall:
                 PaywallView()

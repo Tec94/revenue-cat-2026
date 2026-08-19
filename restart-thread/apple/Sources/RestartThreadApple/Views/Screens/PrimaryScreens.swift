@@ -26,10 +26,10 @@ struct WelcomeScreen: View {
             )
             PrivacyNote("No account or microphone permission is needed to begin.")
             VStack(spacing: 12) {
-                PrimaryActionButton(title: "Leave my first thread", action: controller.leaveFirstThread)
-                SecondaryActionButton(title: "Try the 20-second example", action: controller.tryExample)
-                TertiaryActionButton(title: "Sign in", action: controller.showAccountOffer)
-                TertiaryActionButton(title: "How your data stays local", action: controller.showDataPrivacy)
+                PrimaryActionButton(title: "Leave my first thread") { controller.leaveFirstThread() }
+                SecondaryActionButton(title: "Try the 20-second example") { controller.tryExample() }
+                TertiaryActionButton(title: "Sign in") { controller.showAccountOffer() }
+                TertiaryActionButton(title: "How your data stays local") { controller.showDataPrivacy() }
             }
         }
         .padding(.top, 28)
@@ -54,7 +54,10 @@ struct CaptureScreen: View {
             )
             ContentCard {
                 Text("Current state").font(.headline)
-                TextEditor(text: Binding(get: { controller.state.input }, set: controller.setInput))
+                TextEditor(text: Binding(
+                    get: { controller.state.input },
+                    set: { controller.setInput($0) }
+                ))
                     .font(.body)
                     .frame(minHeight: 132)
                     .padding(8)
@@ -64,7 +67,7 @@ struct CaptureScreen: View {
                 CaptureProgressView(progress: controller.state.captureProgress)
             }
             VStack(spacing: 12) {
-                PrimaryActionButton(title: "Save and find a first step", ink: true, action: controller.saveText)
+                PrimaryActionButton(title: "Save and find a first step", ink: true) { controller.saveText() }
                 SecondaryActionButton(
                     title: controller.state.isRecording ? "Stop and save voice note" : "Record a voice note"
                 ) { model.voiceTapped() }
@@ -74,7 +77,7 @@ struct CaptureScreen: View {
         }
         .alert("Record where you left off", isPresented: $model.showMicrophoneRationale) {
             Button("Continue") { Task { await model.requestVoicePermission() } }
-            Button("Use text", role: .cancel, action: model.continueWithText)
+            Button("Use text", role: .cancel) { model.continueWithText() }
         } message: {
             Text(
                 "Restart Thread needs microphone access only while you record this voice note. " +
@@ -108,7 +111,10 @@ struct ReviewScreen: View {
             DottedTrace()
             ContentCard {
                 Text("Editable first step").font(.headline)
-                TextEditor(text: Binding(get: { controller.state.action }, set: controller.setAction))
+                TextEditor(text: Binding(
+                    get: { controller.state.action },
+                    set: { controller.setAction($0) }
+                ))
                     .font(.title3.weight(.semibold))
                     .frame(minHeight: 96)
                     .padding(8)
@@ -119,14 +125,14 @@ struct ReviewScreen: View {
                     .foregroundStyle(.secondary)
             }
             VStack(spacing: 12) {
-                PrimaryActionButton(title: "Start this step", action: controller.confirmStart)
+                PrimaryActionButton(title: "Start this step") { controller.confirmStart() }
                 SecondaryActionButton(title: whyVisible ? "Hide source" : "Why this step?") {
                     withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
                         whyVisible.toggle()
                     }
                 }
                 if !isExample {
-                    TertiaryActionButton(title: "Save and return later", action: controller.goNow)
+                    TertiaryActionButton(title: "Save and return later") { controller.goNow() }
                 }
             }
             if whyVisible {
@@ -155,10 +161,10 @@ struct StartedScreen: View {
             )
             FocusCard(label: "Started step", text: controller.state.action)
             VStack(spacing: 12) {
-                PrimaryActionButton(title: "Back to Now", ink: true, action: controller.finishStarted)
-                SecondaryActionButton(title: "Leave a new stopping point", action: controller.leaveNewStoppingPoint)
-                TertiaryActionButton(title: "Mark thread complete", action: controller.markCurrentComplete)
-                TertiaryActionButton(title: "Archive thread", action: controller.archiveCurrent)
+                PrimaryActionButton(title: "Back to Now", ink: true) { controller.finishStarted() }
+                SecondaryActionButton(title: "Leave a new stopping point") { controller.leaveNewStoppingPoint() }
+                TertiaryActionButton(title: "Mark thread complete") { controller.markCurrentComplete() }
+                TertiaryActionButton(title: "Archive thread") { controller.archiveCurrent() }
             }
         }
     }
@@ -189,14 +195,14 @@ struct AccountOfferScreen: View {
             }
             if auth.state.isAuthenticated {
                 FocusCard(label: "Signed in", text: auth.state.displayName ?? "Your account is connected.")
-                PrimaryActionButton(title: "Continue to Now", action: controller.completeAccountStep)
+                PrimaryActionButton(title: "Continue to Now") { controller.completeAccountStep() }
             } else {
                 VStack(spacing: 12) {
                     PrimaryActionButton(
                         title: auth.state.isLoading ? "Opening secure sign-in…" : "Create or sign in",
-                        action: model.signIn
+                        action: { model.signIn() }
                     )
-                    SecondaryActionButton(title: "Continue without an account", action: controller.completeAccountStep)
+                    SecondaryActionButton(title: "Continue without an account") { controller.completeAccountStep() }
                 }
             }
             if !auth.state.isConfigured {
@@ -239,7 +245,7 @@ struct NowScreen: View {
             recentSection
             #endif
             VStack(spacing: 12) {
-                SecondaryActionButton(title: "View all threads", action: controller.showAllThreads)
+                SecondaryActionButton(title: "View all threads") { controller.showAllThreads() }
                 TertiaryActionButton(title: "Open settings", action: openSettings)
             }
         }
@@ -249,14 +255,14 @@ struct NowScreen: View {
         if let current = controller.state.currentThread {
             VStack(spacing: 12) {
                 ReturnCard(thread: current) { controller.openThread(id: current.id) }
-                SecondaryActionButton(title: "Update stopping point", action: controller.leaveNewStoppingPoint)
+                SecondaryActionButton(title: "Update stopping point") { controller.leaveNewStoppingPoint() }
             }
         } else {
             EmptyStateCard(
                 title: "Nothing is waiting here",
                 bodyText: "Leave where you are so one clear step is ready when you return.",
                 actionTitle: "Leave a thread",
-                action: controller.startNewThread
+                action: { controller.startNewThread() }
             )
         }
     }
@@ -269,7 +275,7 @@ struct NowScreen: View {
         if !recents.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Recent threads").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
-                ThreadListCard(threads: Array(recents), onOpen: controller.openThread)
+                ThreadListCard(threads: Array(recents)) { controller.openThread(id: $0) }
             }
         }
     }

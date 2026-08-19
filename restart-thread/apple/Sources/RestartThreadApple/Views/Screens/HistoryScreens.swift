@@ -13,7 +13,10 @@ struct AllThreadsScreen: View {
             )
             TextField(
                 "Words or first step",
-                text: Binding(get: { controller.state.searchQuery }, set: controller.setSearchQuery)
+                text: Binding(
+                    get: { controller.state.searchQuery },
+                    set: { controller.setSearchQuery($0) }
+                )
             )
             .textFieldStyle(.roundedBorder)
             .accessibilityLabel("Search threads")
@@ -33,7 +36,7 @@ struct AllThreadsScreen: View {
                             Text(status.displayName)
                                 .font(.title3.weight(.semibold))
                                 .accessibilityAddTraits(.isHeader)
-                            ThreadListCard(threads: section, onOpen: controller.openThread)
+                            ThreadListCard(threads: section) { controller.openThread(id: $0) }
                         }
                     }
                 }
@@ -41,7 +44,7 @@ struct AllThreadsScreen: View {
             SettingsActionRow(
                 title: "Recently deleted",
                 supporting: "Restore a thread or remove it permanently.",
-                action: controller.showRecentlyDeleted
+                action: { controller.showRecentlyDeleted() }
             )
         }
     }
@@ -86,35 +89,35 @@ struct ThreadDetailScreen: View {
                     SettingsActionRow(
                         title: "Edit stopping point",
                         supporting: "Change the saved context and first step.",
-                        action: controller.editSelectedThread
+                        action: { controller.editSelectedThread() }
                     )
                     if thread.status == .active {
                         SettingsActionRow(
                             title: "Return to thread",
                             supporting: "Open the saved first step.",
-                            action: controller.returnToSelectedThread
+                            action: { controller.returnToSelectedThread() }
                         )
                         SettingsActionRow(
                             title: "Mark complete",
                             supporting: "Move this thread out of Now.",
-                            action: controller.completeSelectedThread
+                            action: { controller.completeSelectedThread() }
                         )
                     }
                     SettingsActionRow(
                         title: "Archive thread",
                         supporting: "Keep it in history without making it current.",
-                        action: controller.archiveSelectedThread
+                        action: { controller.archiveSelectedThread() }
                     )
                     SettingsActionRow(
                         title: "Export thread",
                         supporting: "Share a readable copy from this device.",
-                        action: controller.exportSelectedThread
+                        action: { controller.exportSelectedThread() }
                     )
                     SettingsActionRow(
                         title: "Delete thread",
                         supporting: "Move it to Recently deleted.",
                         destructive: true,
-                        action: controller.deleteSelectedThread
+                        action: { controller.deleteSelectedThread() }
                     )
                 }
             }
@@ -186,7 +189,7 @@ struct DataPrivacyScreen: View {
                 label: "Your choices",
                 text: "Use text without microphone access, export individual threads, delete local threads, or delete the separate cloud account."
             )
-            SecondaryActionButton(title: "Go back", action: controller.goBack)
+            SecondaryActionButton(title: "Go back") { controller.goBack() }
         }
     }
 }

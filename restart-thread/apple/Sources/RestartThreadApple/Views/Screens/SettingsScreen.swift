@@ -39,13 +39,13 @@ public struct RestartThreadSettingsView: View {
             }
         }
         .alert("Move all threads to Recently deleted?", isPresented: $confirmLocalDelete) {
-            Button("Move all threads", role: .destructive, action: controller.deleteAllLocalThreads)
+            Button("Move all threads", role: .destructive) { controller.deleteAllLocalThreads() }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("You can restore them later or delete them permanently.")
         }
         .alert("Delete cloud account?", isPresented: $confirmCloudDelete) {
-            Button("Delete cloud account", role: .destructive, action: model.deleteCloudAccount)
+            Button("Delete cloud account", role: .destructive) { model.deleteCloudAccount() }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("This removes Auth0 and cloud allowance data. Local threads stay on this device.")
@@ -55,7 +55,7 @@ public struct RestartThreadSettingsView: View {
                 get: { embedded ? nil : localSubscriptionSurface },
                 set: { if !embedded { localSubscriptionSurface = $0 } }
             ),
-            onDismiss: subscriptions.refresh
+            onDismiss: { subscriptions.refresh() }
         ) { surface in
             switch surface {
             case .paywall:
@@ -93,7 +93,7 @@ public struct RestartThreadSettingsView: View {
                     SettingsActionRow(
                         title: "Sign out",
                         supporting: "Keep local threads on this device.",
-                        action: model.signOut
+                        action: { model.signOut() }
                     )
                     SettingsActionRow(
                         title: "Delete cloud account",
@@ -104,7 +104,7 @@ public struct RestartThreadSettingsView: View {
                     SettingsActionRow(
                         title: "Create or sign in",
                         supporting: "Link Pro and cloud allowance to your account.",
-                        action: model.signIn
+                        action: { model.signIn() }
                     )
                 }
                 if let message = auth.state.message { Text(message).foregroundStyle(.secondary) }
@@ -119,19 +119,19 @@ public struct RestartThreadSettingsView: View {
                     SettingsActionRow(
                         title: "Manage subscription",
                         supporting: subscriptionManagementDescription,
-                        action: showCustomerCenter
+                        action: { showCustomerCenter() }
                     )
                 } else if subscriptions.state.canPresentPaywall {
                     SettingsActionRow(
                         title: "Explore Pro",
                         supporting: "Compare the available monthly and yearly plans.",
-                        action: showPaywall
+                        action: { showPaywall() }
                     )
                 }
                 SettingsActionRow(
                     title: "Restore purchases",
                     supporting: "Check this App Store account for active purchases.",
-                    action: model.restorePurchases
+                    action: { model.restorePurchases() }
                 )
                 if let message = subscriptions.state.statusMessage {
                     Text(message).foregroundStyle(.secondary)
@@ -148,7 +148,7 @@ public struct RestartThreadSettingsView: View {
                     supporting: model.microphonePermission == .granted
                         ? "Voice capture is available."
                         : "Text capture remains fully available.",
-                    action: model.openMicrophoneSettings
+                    action: { model.openMicrophoneSettings() }
                 )
             }
 
@@ -177,7 +177,7 @@ public struct RestartThreadSettingsView: View {
                 SettingsActionRow(
                     title: "Add home widget",
                     supporting: "The widget can show your current first step. Add it only where that is private enough.",
-                    action: model.showWidgetInstructions
+                    action: { model.showWidgetInstructions() }
                 )
             }
 
