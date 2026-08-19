@@ -129,7 +129,7 @@ struct PrimaryActionButton: View {
                 Circle().fill(foreground).frame(width: 18, height: 18)
                 Text(title).fontWeight(.semibold).frame(maxWidth: .infinity)
                 Image(systemName: "arrow.right")
-                    .fontWeight(.semibold)
+                    .font(.body.weight(.semibold))
                     .accessibilityHidden(true)
             }
             .padding(.horizontal, 18)
