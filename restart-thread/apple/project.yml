@@ -1,0 +1,217 @@
+name: RestartThread
+options:
+  minimumXcodeGenVersion: 2.46.0
+  bundleIdPrefix: com.restartthread
+  deploymentTarget:
+    iOS: "15.0"
+    macOS: "12.0"
+  xcodeVersion: "16.0"
+  transitivelyLinkDependencies: true
+
+packages:
+  RestartThreadApplePackage:
+    path: .
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: ""
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  RestartThread iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Apps/iOS
+      - path: Resources/iOS/Assets.xcassets
+      - path: Resources/Shared/PrivacyInfo.xcprivacy
+    configFiles:
+      Debug: Config/iOS.xcconfig
+      Release: Config/iOS.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.restartthread.app
+        PRODUCT_NAME: Restart Thread
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SUPPORTS_MACCATALYST: false
+    info:
+      path: Generated/iOS-Info.plist
+      properties:
+        CFBundleDisplayName: Restart Thread
+        UILaunchScreen: {}
+        NSMicrophoneUsageDescription: Record where you stopped so the encrypted voice note can stay on this device.
+        CADisableMinimumFrameDurationOnPhone: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        AUTH0_DOMAIN: $(AUTH0_DOMAIN)
+        AUTH0_CLIENT_ID: $(AUTH0_CLIENT_ID)
+        AUTH0_AUDIENCE: $(AUTH0_AUDIENCE)
+        BACKEND_BASE_URL: $(BACKEND_BASE_URL)
+        REVENUECAT_API_KEY: $(REVENUECAT_API_KEY)
+        APP_GROUP_IDENTIFIER: $(APP_GROUP_IDENTIFIER)
+        KEYCHAIN_ACCESS_GROUP: $(KEYCHAIN_ACCESS_GROUP)
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: Restart Thread routes
+            CFBundleURLSchemes:
+              - restartthread
+              - $(PRODUCT_BUNDLE_IDENTIFIER)
+    entitlements:
+      path: Generated/RestartThread-iOS.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - $(APP_GROUP_IDENTIFIER)
+        keychain-access-groups:
+          - $(KEYCHAIN_ACCESS_GROUP)
+        com.apple.developer.associated-domains:
+          - webcredentials:$(AUTH0_DOMAIN)
+    dependencies:
+      - package: RestartThreadApplePackage
+        product: RestartThreadApple
+      - target: RestartThread Widget iOS
+        embed: true
+    scheme:
+      testTargets:
+        - package: RestartThreadApplePackage/RestartThreadCoreTests
+
+  RestartThread macOS:
+    type: application
+    platform: macOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: Apps/macOS
+      - path: Resources/macOS/Assets.xcassets
+      - path: Resources/Shared/PrivacyInfo.xcprivacy
+    configFiles:
+      Debug: Config/macOS.xcconfig
+      Release: Config/macOS.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.restartthread.app.mac
+        PRODUCT_NAME: Restart Thread
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        COMBINE_HIDPI_IMAGES: true
+    info:
+      path: Generated/macOS-Info.plist
+      properties:
+        CFBundleDisplayName: Restart Thread
+        LSApplicationCategoryType: public.app-category.productivity
+        NSHumanReadableCopyright: Copyright © 2026 Restart Thread
+        NSMicrophoneUsageDescription: Record where you stopped so the encrypted voice note can stay on this Mac.
+        AUTH0_DOMAIN: $(AUTH0_DOMAIN)
+        AUTH0_CLIENT_ID: $(AUTH0_CLIENT_ID)
+        AUTH0_AUDIENCE: $(AUTH0_AUDIENCE)
+        BACKEND_BASE_URL: $(BACKEND_BASE_URL)
+        REVENUECAT_API_KEY: $(REVENUECAT_API_KEY)
+        APP_GROUP_IDENTIFIER: $(APP_GROUP_IDENTIFIER)
+        KEYCHAIN_ACCESS_GROUP: $(KEYCHAIN_ACCESS_GROUP)
+        CFBundleURLTypes:
+          - CFBundleTypeRole: Editor
+            CFBundleURLName: Restart Thread routes
+            CFBundleURLSchemes:
+              - restartthread
+              - $(PRODUCT_BUNDLE_IDENTIFIER)
+    entitlements:
+      path: Generated/RestartThread-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+        com.apple.security.device.audio-input: true
+        com.apple.security.files.user-selected.read-write: true
+        com.apple.security.application-groups:
+          - $(APP_GROUP_IDENTIFIER)
+        keychain-access-groups:
+          - $(KEYCHAIN_ACCESS_GROUP)
+        com.apple.developer.associated-domains:
+          - webcredentials:$(AUTH0_DOMAIN)
+    dependencies:
+      - package: RestartThreadApplePackage
+        product: RestartThreadApple
+      - target: RestartThread Widget macOS
+        embed: true
+    scheme:
+      testTargets:
+        - package: RestartThreadApplePackage/RestartThreadCoreTests
+
+  RestartThread Widget iOS:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources:
+      - path: Widget
+      - path: Resources/Shared/PrivacyInfo.xcprivacy
+    configFiles:
+      Debug: Config/Base.xcconfig
+      Release: Config/Base.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.restartthread.app.widget
+        PRODUCT_NAME: Restart Thread Widget
+        APPLICATION_EXTENSION_API_ONLY: true
+        SKIP_INSTALL: true
+    info:
+      path: Generated/Widget-iOS-Info.plist
+      properties:
+        CFBundleDisplayName: Restart Thread
+        APP_GROUP_IDENTIFIER: $(APP_GROUP_IDENTIFIER)
+        KEYCHAIN_ACCESS_GROUP: $(KEYCHAIN_ACCESS_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Generated/RestartThread-Widget-iOS.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - $(APP_GROUP_IDENTIFIER)
+        keychain-access-groups:
+          - $(KEYCHAIN_ACCESS_GROUP)
+    dependencies:
+      - package: RestartThreadApplePackage
+        product: RestartThreadCore
+
+  RestartThread Widget macOS:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "12.0"
+    sources:
+      - path: Widget
+      - path: Resources/Shared/PrivacyInfo.xcprivacy
+    configFiles:
+      Debug: Config/Base.xcconfig
+      Release: Config/Base.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.restartthread.app.mac.widget
+        PRODUCT_NAME: Restart Thread Widget
+        APPLICATION_EXTENSION_API_ONLY: true
+        SKIP_INSTALL: true
+    info:
+      path: Generated/Widget-macOS-Info.plist
+      properties:
+        CFBundleDisplayName: Restart Thread
+        APP_GROUP_IDENTIFIER: $(APP_GROUP_IDENTIFIER)
+        KEYCHAIN_ACCESS_GROUP: $(KEYCHAIN_ACCESS_GROUP)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Generated/RestartThread-Widget-macOS.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.application-groups:
+          - $(APP_GROUP_IDENTIFIER)
+        keychain-access-groups:
+          - $(KEYCHAIN_ACCESS_GROUP)
+    dependencies:
+      - package: RestartThreadApplePackage
+        product: RestartThreadCore

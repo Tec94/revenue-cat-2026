@@ -1,0 +1,8 @@
+AUTH0_DOMAIN = restart-thread.invalid
+AUTH0_AUDIENCE =
+BACKEND_BASE_URL =
+REVENUECAT_API_KEY =
+APP_GROUP_IDENTIFIER = group.com.restartthread.app
+KEYCHAIN_ACCESS_GROUP = $(AppIdentifierPrefix)com.restartthread.shared
+
+#include? "Secrets.xcconfig"

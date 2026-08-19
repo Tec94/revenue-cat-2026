@@ -1,0 +1,62 @@
+name: Restart Thread Apple
+
+on:
+  push:
+    paths:
+      - "restart-thread/apple/**"
+      - ".github/workflows/restart-thread-apple.yml"
+  pull_request:
+    paths:
+      - "restart-thread/apple/**"
+      - ".github/workflows/restart-thread-apple.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: restart-thread/apple
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Android-to-Apple product parity
+        run: python3 script/verify_port_parity.py
+
+      - name: Verify Apple assets and launcher
+        run: |
+          python3 script/verify_apple_assets.py
+          bash -n script/build_and_run.sh
+
+      - name: Select Xcode 16.4
+        run: sudo xcode-select --switch /Applications/Xcode_16.4.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Test shared Apple core
+        run: swift test
+
+      - name: Build iOS app and widget
+        run: >-
+          xcodebuild
+          -project RestartThread.xcodeproj
+          -scheme "RestartThread iOS"
+          -destination "generic/platform=iOS Simulator"
+          CODE_SIGNING_ALLOWED=NO
+          build
+
+      - name: Build macOS app and widget
+        run: >-
+          xcodebuild
+          -project RestartThread.xcodeproj
+          -scheme "RestartThread macOS"
+          -destination "platform=macOS"
+          CODE_SIGNING_ALLOWED=NO
+          build

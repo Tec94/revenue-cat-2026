@@ -15,6 +15,13 @@ iosApp/**/xcuserdata/
 iosApp/**/*.xcuserstate
 iosApp/DerivedData/
 iosApp/Secrets.xcconfig
+apple/**/*.xcuserstate
+apple/**/xcuserdata/
+apple/DerivedData/
+apple/.build/
+apple/build/
+apple/RestartThread.xcodeproj/
+apple/Config/Secrets.xcconfig
 
 # Cloudflare and Node
 backend/node_modules/
